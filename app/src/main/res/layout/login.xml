@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/corFundo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/blue_navy"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5"
+        />
+
+    <ImageView
+        android:id="@+id/imgFundo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.08"
+        android:scaleType="centerCrop"
+        android:src="@drawable/fundo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        />
+
+    <ImageView
+        android:id="@+id/imglogo"
+        android:layout_width="192dp"
+        android:layout_height="82dp"
+        android:layout_marginVertical="149dp"
+        android:src="@drawable/logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/corFundo"
+        />
+
+    <TextView
+        android:id="@+id/textSlogan"
+        android:layout_width="324dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="33dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="Monitore sua respiração em tempo real"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="26dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imglogo"
+        />
+
+    <TextView
+        android:id="@+id/textInforme"
+        android:layout_width="324dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:paddingLeft="30dp"
+        android:paddingRight="30dp"
+        android:text="O Asthma Space une tecnologia e empatia para prevenir crises e melhorar a vida de quem convive com doenças respiratórias."
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="13dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textSlogan"
+        />
+
+    <TextView
+        android:id="@+id/textEmail"
+        android:layout_width="324dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:paddingLeft="22dp"
+        android:paddingRight="22dp"
+        android:text="Email"
+        android:textColor="@color/white"
+        android:textSize="13dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textInforme"
+        />
+
+    <EditText
+        android:id="@+id/editTextEmail"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/text_box"
+        android:layout_marginTop="5dp"
+        android:ems="10"
+        android:hint="yourname@email.com"
+        android:inputType="text"
+        android:padding="10dp"
+        android:textColorHint="@color/white"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textEmail"
+        />
+
+
+    <TextView
+        android:id="@+id/textSenha"
+        android:layout_width="324dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:paddingLeft="22dp"
+        android:paddingRight="22dp"
+        android:text="Senha"
+        android:textColor="@color/white"
+        android:textSize="13dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/editTextEmail"
+        />
+
+    <EditText
+        android:id="@+id/editTextSenha"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/text_box"
+        android:layout_marginTop="5dp"
+        android:ems="10"
+        android:hint="Enter your password"
+        android:inputType="text"
+        android:padding="10dp"
+        android:textColorHint="@color/white"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textSenha"
+        />
+
+    <Button
+        android:id="@+id/btnEntrar"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="ENTRAR"
+        android:textSize="14dp"
+        android:textStyle="bold"
+        android:textColor="@color/blue_navy"
+        android:backgroundTint="@color/turquoise_light"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/editTextSenha"
+        />
+    <TextView
+        android:id="@+id/textLogin"
+        android:layout_width="324dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:paddingLeft="22dp"
+        android:paddingRight="22dp"
+        android:text="Não tem uma conta? Cadastre-se!"
+        android:textColor="@color/white"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnEntrar"
+        />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
