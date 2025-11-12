@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Projeto Asthma Space</string>
+    <string-array name="spinner_sexo">
+        <item>Selecione</item>
+        <item>Masculino</item>
+        <item>Feminino</item>
+        <item>Não informar</item>
+    </string-array>
 </resources>

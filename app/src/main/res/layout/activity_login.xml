@@ -41,17 +41,21 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="20dp">
+            android:paddingTop="120dp"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:paddingBottom="50dp"
+            >
 
             <ImageView
                 android:id="@+id/imglogo"
-                android:layout_width="192dp"
+                android:layout_width="wrap_content"
                 android:layout_height="82dp"
-                android:layout_marginTop="149dp"
                 android:src="@drawable/logo"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                />
 
             <TextView
                 android:id="@+id/textSlogan"
@@ -155,7 +159,7 @@
                 android:id="@+id/btnEntrar"
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="15dp"
                 android:backgroundTint="@color/turquoise_light"
                 android:text="ENTRAR"
                 android:textColor="@color/blue_navy"
@@ -167,10 +171,25 @@
                 app:layout_constraintTop_toBottomOf="@id/editTextSenha" />
 
             <TextView
-                android:id="@+id/textLogin"
+                android:id="@+id/textTermServ"
                 android:layout_width="324dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
+                android:paddingLeft="22dp"
+                android:paddingRight="22dp"
+                android:text="Ao clicar em qualquer um dos botões de inscrição, você concorda com os termos de serviço."
+                android:textColor="@color/white"
+                android:textSize="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnEntrar" />
+
+            <TextView
+                android:id="@+id/textCadastre"
+                android:layout_width="324dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="13dp"
                 android:paddingLeft="22dp"
                 android:paddingRight="22dp"
                 android:text="Não tem uma conta? Cadastre-se!"
@@ -179,7 +198,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnEntrar" />
+                app:layout_constraintTop_toBottomOf="@id/textTermServ" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
