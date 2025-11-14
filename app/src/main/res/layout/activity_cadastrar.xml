@@ -42,9 +42,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="30dp"
-            android:paddingTop="80dp"
+            android:paddingTop="35dp"
             android:paddingRight="30dp"
-            android:paddingBottom="50dp">
+            android:paddingBottom="35dp">
 
             <ImageView
                 android:id="@+id/imglogo"
@@ -153,6 +153,41 @@
                 app:layout_constraintTop_toBottomOf="@id/textEmail" />
 
             <TextView
+                android:id="@+id/textCriarSenha"
+                android:layout_width="324dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="22dp"
+                android:paddingRight="22dp"
+                android:text="Criar Senha *"
+                android:textColor="@color/white"
+                android:textSize="13dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/editTextEmail" />
+
+            <EditText
+                android:id="@+id/editTextCriarSenha"
+                android:layout_width="280dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/text_box"
+                android:ems="10"
+                android:hint="Create a password"
+                android:inputType="textPassword"
+                android:padding="10dp"
+                android:textColorHint="@color/white"
+                android:textSize="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textCriarSenha" />
+
+
+
+
+            <TextView
                 android:id="@+id/textCpf"
                 android:layout_width="324dp"
                 android:layout_height="wrap_content"
@@ -165,7 +200,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/editTextEmail" />
+                app:layout_constraintTop_toBottomOf="@id/editTextCriarSenha" />
 
             <EditText
                 android:id="@+id/editTextCpf"
@@ -281,7 +316,7 @@
                 android:id="@+id/btnContinuar"
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="20dp"
                 android:backgroundTint="@color/turquoise_light"
                 android:text="CONTINUAR"
                 android:textColor="@color/blue_navy"

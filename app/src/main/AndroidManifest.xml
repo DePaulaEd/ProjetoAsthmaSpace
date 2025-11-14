@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ProjetoAsthmaSpace">
         <activity
+            android:name=".TelaInicial"
+            android:exported="false" />
+        <activity
             android:name=".InfAdicionais"
             android:exported="false" />
         <activity
