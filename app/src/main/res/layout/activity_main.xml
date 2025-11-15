@@ -7,113 +7,50 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <ImageView
-        android:id="@+id/corFundo"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/blue_navy"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/imgFundo"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:alpha="0.12"
-        android:scaleType="centerCrop"
-        android:src="@drawable/fundo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.core.widget.NestedScrollView
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="20dp">
-
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/blue_navy">
 
             <ImageView
-                android:id="@+id/imglogo"
-                android:layout_width="192dp"
-                android:layout_height="82dp"
-                android:layout_marginTop="244dp"
+                android:id="@+id/toolbar_logo"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp" 
                 android:src="@drawable/logo"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:adjustViewBounds="true"
+                android:layout_gravity="start" />
 
-            <TextView
-                android:id="@+id/textSlogan"
-                android:layout_width="324dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="33dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:text="Transformando cada respiro em liberdade"
-                android:textAlignment="center"
-                android:textColor="@color/white"
-                android:textSize="26dp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/imglogo" />
+        </androidx.appcompat.widget.Toolbar>
 
-            <TextView
-                android:id="@+id/textInforme"
-                android:layout_width="324dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:text="Faça seu cadastro e personalize alertas e recomendações conforme o seu perfil de saúde."
-                android:textAlignment="center"
-                android:textColor="@color/white"
-                android:textSize="13dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textSlogan" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-            <Button
-                android:id="@+id/btnEntrar"
-                android:layout_width="280dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:backgroundTint="@color/turquoise_light"
-                android:text="ENTRAR"
-                android:textColor="@color/blue_navy"
-                android:textSize="14dp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textInforme" />
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
 
-            <Button
-                android:id="@+id/btnCriarConta"
-                android:layout_width="280dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:backgroundTint="@color/turquoise_light"
-                android:text="CRIAR CONTA"
-                android:textColor="@color/blue_navy"
-                android:textSize="14dp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnEntrar" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.core.widget.NestedScrollView>
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:itemIconTint="@color/bottom_nav_item_color"
+        app:itemTextColor="@color/bottom_nav_item_color"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_nav_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
