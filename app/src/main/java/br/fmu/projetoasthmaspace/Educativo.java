@@ -33,4 +33,5 @@ public class Educativo extends Fragment {
         super.onDestroyView();
         binding = null;
     }
+
 }
