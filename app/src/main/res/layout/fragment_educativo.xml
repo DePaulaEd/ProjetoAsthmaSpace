@@ -4,9 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TelaInicial">
+    tools:context=".Educativo">
 
-    <!-- Mantendo o fundo para consistência visual -->
     <ImageView
         android:id="@+id/corFundo"
         android:layout_width="0dp"
@@ -32,7 +31,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tela Inicial"
+        android:text="Educativo"
         android:textColor="@color/white"
         android:textSize="24sp"
         android:textStyle="bold"
