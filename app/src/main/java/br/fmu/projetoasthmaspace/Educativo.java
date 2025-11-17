@@ -59,13 +59,36 @@ public class Educativo extends Fragment {
     }
 
     private void preencherListaDeArtigos() {
-        String conteudoLongo = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-
-        artigos.add(new Artigo("Aonde Guardar seu Inalador", "Um guia sobre os melhores locais para armazenar seu inalador para garantir sua eficácia.", conteudoLongo, R.drawable.img_inalador));
-        artigos.add(new Artigo("Como Limpar seu Espaçador", "Um guia passo a passo para manter seu espaçador limpo e seguro para uso.", conteudoLongo, R.drawable.img_inalador));
-        artigos.add(new Artigo("Exercícios de Respiração", "Técnicas de respiração que podem ajudar a controlar os sintomas da asma.", conteudoLongo, R.drawable.img_inalador));
-        artigos.add(new Artigo("Gatilhos Comuns da Asma", "Identifique e evite os gatilhos mais comuns que podem levar a uma crise de asma.", conteudoLongo, R.drawable.img_inalador));
-        artigos.add(new Artigo("Plano de Ação para Asma", "Aprenda a criar um plano de ação personalizado com seu médico.", conteudoLongo, R.drawable.img_inalador));
+        artigos.add(new Artigo(
+                "Aonde Guardar seu Inalador",
+                "Um guia sobre os melhores locais para armazenar seu inalador.",
+                "Para garantir a eficácia do seu inalador, guarde-o em um local seco e em temperatura ambiente. Evite locais úmidos como o banheiro, ou locais muito quentes, como o porta-luvas do carro. Mantenha-o longe da luz solar direta e certifique-se de que a tampa do bocal esteja sempre no lugar para protegê-lo de poeira e sujeira.",
+                R.drawable.img_inalador
+        ));
+        artigos.add(new Artigo(
+                "Como Limpar seu Espaçador",
+                "Um guia passo a passo para manter seu espaçador limpo e seguro.",
+                "Limpar seu espaçador é crucial para evitar o acúmulo de mofo e bactérias. Desmonte-o e lave as peças em água morna com um pouco de detergente neutro. Enxágue bem e deixe secar completamente ao ar livre, sem usar panos. A limpeza deve ser feita pelo menos uma vez por semana.",
+                R.drawable.img_inalador
+        ));
+        artigos.add(new Artigo(
+                "Exercícios de Respiração",
+                "Técnicas de respiração que podem ajudar a controlar os sintomas.",
+                "Exercícios como a respiração diafragmática podem fortalecer seus pulmões. Sente-se confortavelmente, coloque uma mão no peito e outra na barriga. Inspire lentamente pelo nariz, sentindo sua barriga se expandir. Expire lentamente pela boca. Praticar de 5 a 10 minutos por dia pode ajudar a melhorar sua capacidade respiratória e a gerenciar a falta de ar.",
+                R.drawable.img_inalador
+        ));
+        artigos.add(new Artigo(
+                "Gatilhos Comuns da Asma",
+                "Identifique e evite os gatilhos mais comuns que podem levar a uma crise.",
+                "Os gatilhos da asma variam de pessoa para pessoa, mas os mais comuns incluem poeira, pólen, mofo, pelos de animais, fumaça de cigarro, poluição do ar, ar frio e exercícios intensos. Manter um diário de sintomas pode ajudá-lo a identificar seus gatilhos específicos para que você possa evitá-los de forma mais eficaz.",
+                R.drawable.img_inalador
+        ));
+        artigos.add(new Artigo(
+                "Plano de Ação para Asma",
+                "Aprenda a criar um plano de ação personalizado com seu médico.",
+                "Um plano de ação para asma é um guia escrito que você desenvolve com seu médico. Ele detalha seus medicamentos diários, como lidar com o agravamento dos sintomas e o que fazer em caso de uma crise de asma. Ter um plano claro e acessível é uma das ferramentas mais importantes para gerenciar sua condição com segurança.",
+                R.drawable.img_inalador
+        ));
     }
 
     private void adicionarArtigo(final Artigo artigo) {
@@ -79,9 +102,8 @@ public class Educativo extends Fragment {
 
         artigoImagem.setImageResource(artigo.imagemResId);
         artigoTitulo.setText(artigo.titulo);
-        artigoResumo.setText(artigo.resumo); // Mostra o resumo na lista
+        artigoResumo.setText(artigo.resumo);
 
-        // Ao clicar, passa o CONTEÚDO completo para o diálogo
         artigoBtnLer.setOnClickListener(v -> showArtigoDialog(artigo.titulo, artigo.conteudo));
 
         binding.containerArtigos.addView(itemView);
