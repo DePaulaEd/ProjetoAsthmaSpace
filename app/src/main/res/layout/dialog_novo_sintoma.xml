@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/blue_navy">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nova Anotação no Diário"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"/>
+
+    <EditText
+        android:id="@+id/edit_text_titulo_sintoma"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Título (ex: Senti falta de ar)"
+        android:textColor="@color/white"
+        android:textColorHint="#AFFFFFFF"
+        android:backgroundTint="@color/white"/>
+
+    <EditText
+        android:id="@+id/edit_text_descricao_sintoma"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Descreva seus sintomas..."
+        android:inputType="textMultiLine"
+        android:gravity="top"
+        android:lines="4"
+        android:textColor="@color/white"
+        android:textColorHint="#AFFFFFFF"
+        android:backgroundTint="@color/white"/>
+
+</LinearLayout>
