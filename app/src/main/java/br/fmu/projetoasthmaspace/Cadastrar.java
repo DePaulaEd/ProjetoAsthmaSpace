@@ -1,5 +1,6 @@
 package br.fmu.projetoasthmaspace;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -12,18 +13,25 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import br.fmu.projetoasthmaspace.databinding.ActivityCadastrarBinding;
+
 public class Cadastrar extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
+
+    private ActivityCadastrarBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_cadastrar);
+        binding = ActivityCadastrarBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        Spinner spinnerSexo = findViewById(R.id.spinnerSexo);
-        spinnerSexo.setOnItemSelectedListener(this);
+        binding.spinnerSexo.setOnItemSelectedListener(this);
 
-
+        binding.btnContinuar.setOnClickListener(v -> {
+            Intent intent = new Intent(Cadastrar.this, InfAdicionais.class);
+            startActivity(intent);
+        });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -34,7 +42,8 @@ public class Cadastrar extends AppCompatActivity implements AdapterView.OnItemSe
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        Toast.makeText(this, adapterView.getItemAtPosition(i).toString(), Toast.LENGTH_SHORT).show();
+        // Opcional: mostrar um Toast ao selecionar um item no Spinner
+        // Toast.makeText(this, adapterView.getItemAtPosition(i).toString(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
