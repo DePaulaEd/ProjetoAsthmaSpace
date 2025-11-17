@@ -9,4 +9,10 @@
     <color name="blue_opaque">#FF47547E</color>
     <color name="gray_bluish">#FF4B5578</color>
     <color name="turquoise_light">#FFA8D4D4</color>
+
+    <!-- Cores para o painel de resumo -->
+    <color name="blue_dark">#0A84FF</color>
+    <color name="red_dark">#FF453A</color>
+    <color name="gray_dark">#636366</color>
+    <color name="green_dark">#39D04B</color>
 </resources>

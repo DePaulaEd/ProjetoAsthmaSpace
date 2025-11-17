@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/text_data_lembrete"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="24 de Julho de 2024"
+    android:textColor="@color/white"
+    android:textSize="18sp"
+    android:textStyle="bold"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
+    android:background="?android:attr/selectableItemBackground"/>
