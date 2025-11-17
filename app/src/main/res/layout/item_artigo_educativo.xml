@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <ImageView
+            android:id="@+id/artigo_imagem"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:src="@drawable/img_inalador" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/artigo_titulo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Título do Artigo"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/artigo_resumo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Resumo do artigo..."
+                android:textColor="@color/white"
+                android:textSize="10sp" />
+
+            <Button
+                android:id="@+id/artigo_btn_ler"
+                android:layout_width="98dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="19dp"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="@color/turquoise_light"
+                android:padding="2dp"
+                android:text="LER"
+                android:textColor="@color/blue_navy"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/blue_grayish" />
+
+</LinearLayout>
