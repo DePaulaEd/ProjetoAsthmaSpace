@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/blue_navy">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Novo Lembrete"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"/>
+
+    <EditText
+        android:id="@+id/edit_text_titulo_lembrete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Título (ex: Usar inalador)"
+        android:textColor="@color/white"
+        android:textColorHint="#AFFFFFFF"
+        android:backgroundTint="@color/white"/>
+
+    <EditText
+        android:id="@+id/edit_text_horario_lembrete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Horário (ex: 08:00)"
+        android:inputType="time"
+        android:textColor="@color/white"
+        android:textColorHint="#AFFFFFFF"
+        android:backgroundTint="@color/white"/>
+
+</LinearLayout>

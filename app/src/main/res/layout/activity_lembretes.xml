@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".Lembretes">
 
+    <!-- Fundo Padrão -->
     <ImageView
         android:id="@+id/corFundo"
         android:layout_width="0dp"
@@ -28,16 +29,115 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Cabeçalho Fixo -->
     <TextView
+        android:id="@+id/lembretes_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Lembretes"
+        android:layout_marginTop="24dp"
+        android:text="Meus Lembretes"
         android:textColor="@color/white"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Painel de Resumo -->
+    <GridLayout
+        android:id="@+id/grid_stats"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:columnCount="2"
+        android:rowCount="2"
+        app:layout_constraintTop_toBottomOf="@+id/lembretes_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <include
+            android:id="@+id/stat_hoje"
+            layout="@layout/card_lembrete_stat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"/>
+
+        <include
+            android:id="@+id/stat_programados"
+            layout="@layout/card_lembrete_stat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"/>
+
+        <include
+            android:id="@+id/stat_todos"
+            layout="@layout/card_lembrete_stat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"/>
+
+        <include
+            android:id="@+id/stat_concluidos"
+            layout="@layout/card_lembrete_stat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"/>
+
+    </GridLayout>
+
+    <TextView
+        android:id="@+id/minhas_listas_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="16dp"
+        android:text="Minhas Listas"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/grid_stats" />
+
+    <!-- Área de Rolagem para a lista de lembretes -->
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/minhas_listas_title"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:id="@+id/container_lembretes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#474F6A99"
+            android:padding="16dp"/>
+
+    </ScrollView>
+
+    <!-- Botão para Adicionar Novo Lembrete -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_novo_lembrete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="Novo Lembrete"
+        android:textColor="@color/blue_navy"
+        app:backgroundTint="@color/turquoise_light"
+        app:icon="@android:drawable/ic_input_add"
+        app:iconTint="@color/blue_navy"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
