@@ -1,8 +1,8 @@
 package br.fmu.projetoasthmaspace;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -60,6 +60,15 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
+        binding.toolbarPerfilContainer.setOnClickListener(v -> {
+            replacefragment(new Perfil());
+            binding.bottomNavigationView.getMenu().setGroupCheckable(0, true, false);
+            for (int i = 0; i < binding.bottomNavigationView.getMenu().size(); i++) {
+                binding.bottomNavigationView.getMenu().getItem(i).setChecked(false);
+            }
+            binding.bottomNavigationView.getMenu().setGroupCheckable(0, true, true);
+        });
+
         replacefragment(new TelaInicial());
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -83,48 +92,42 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        carregarNomeUsuario();
+    }
+
+    private void carregarNomeUsuario() {
+        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        String nomeCompleto = prefs.getString("user_name", null); // Pega o nome, ou null se não houver
+
+        if (nomeCompleto != null && !nomeCompleto.trim().isEmpty()) {
+            String primeiroNome = nomeCompleto.split(" ")[0];
+            binding.toolbarUserName.setText("Olá, " + primeiroNome);
+            binding.toolbarUserName.setVisibility(View.VISIBLE);
+        } else {
+            // Se não houver nome salvo, esconde o TextView do nome
+            binding.toolbarUserName.setVisibility(View.GONE);
+        }
     }
 
     private void preencherLembretesExemplo() {
-        // Exemplos para Hoje
         Date hoje = new Date();
         listaDeLembretes.add(new Lembrete("Usar Inalador Preventivo", "08:00", hoje));
         listaDeLembretes.add(new Lembrete("Medir pico de fluxo", "08:15", hoje));
         listaDeLembretes.add(new Lembrete("Tomar antialérgico", "12:00", hoje));
         listaDeLembretes.add(new Lembrete("Usar Inalador Preventivo", "20:00", hoje));
 
-        // Exemplos para Ontem (dia 16)
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, -1);
         Date ontem = cal.getTime();
 
         Lembrete lembreteOntem1 = new Lembrete("Tomar Comprimido", "22:00", ontem);
-        lembreteOntem1.concluida = true; // Marcar como concluído
+        lembreteOntem1.concluida = true;
         listaDeLembretes.add(lembreteOntem1);
 
         Lembrete lembreteOntem2 = new Lembrete("Usar Inalador de Alívio", "15:30", ontem);
-        lembreteOntem2.concluida = true; // Marcar como concluído
+        lembreteOntem2.concluida = true;
         listaDeLembretes.add(lembreteOntem2);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.top_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_perfil) {
-            replacefragment(new Perfil());
-            binding.bottomNavigationView.getMenu().setGroupCheckable(0, true, false);
-            for (int i = 0; i < binding.bottomNavigationView.getMenu().size(); i++) {
-                binding.bottomNavigationView.getMenu().getItem(i).setChecked(false);
-            }
-            binding.bottomNavigationView.getMenu().setGroupCheckable(0, true, true);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     private void replacefragment(Fragment fragment){

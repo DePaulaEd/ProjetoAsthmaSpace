@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permissões para Internet e Localização -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,30 +15,30 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ProjetoAsthmaSpace">
-        <activity
-            android:name=".TelaInicial"
-            android:exported="false" />
-        <activity
-            android:name=".InfAdicionais"
-            android:exported="false" />
-        <activity
-            android:name=".Perfil"
-            android:exported="false" />
-        <activity
-            android:name=".Cadastrar"
-            android:exported="false" />
+
+        <!-- Activity de Login é a tela de início -->
         <activity
             android:name=".Login"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Outras Activities do fluxo de cadastro -->
+        <activity
+            android:name=".Cadastrar"
+            android:exported="true" />
+        <activity
+            android:name=".InfAdicionais"
+            android:exported="true" />
+        
+        <!-- Activity Principal (com os fragmentos) -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+
     </application>
 
 </manifest>

@@ -25,7 +25,6 @@ public class Educativo extends Fragment {
     private FragmentEducativoBinding binding;
     private List<Artigo> artigos = new ArrayList<>();
 
-    // Modelo de dados para um Artigo, agora com conteúdo completo
     private static class Artigo {
         String titulo;
         String resumo;
@@ -51,44 +50,66 @@ public class Educativo extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        preencherListaDeArtigos();
+        if (artigos.isEmpty()) {
+            preencherListaDeArtigos();
+        }
 
+        binding.containerArtigos.removeAllViews();
         for (Artigo artigo : artigos) {
             adicionarArtigo(artigo);
         }
     }
 
     private void preencherListaDeArtigos() {
+        // Artigo sobre AQI (agora no topo)
         artigos.add(new Artigo(
-                "Aonde Guardar seu Inalador",
-                "Um guia sobre os melhores locais para armazenar seu inalador.",
-                "Para garantir a eficácia do seu inalador, guarde-o em um local seco e em temperatura ambiente. Evite locais úmidos como o banheiro, ou locais muito quentes, como o porta-luvas do carro. Mantenha-o longe da luz solar direta e certifique-se de que a tampa do bocal esteja sempre no lugar para protegê-lo de poeira e sujeira.",
-                R.drawable.img_inalador
+            "O que é o Índice de Qualidade do Ar (AQI)?",
+            "Entenda como o AQI traduz os níveis de poluição em um indicador de saúde.",
+            "O Índice de Qualidade do Ar (AQI) é uma escala numérica usada para comunicar ao público quão poluído o ar está atualmente ou quão poluído se prevê que se torne. À medida que o AQI aumenta, um percentual maior da população pode sentir efeitos adversos à saúde. Os valores vão de 0 (Bom) a mais de 300 (Perigoso), e cada nível corresponde a uma recomendação de saúde específica, ajudando você a tomar decisões para proteger seu sistema respiratório.",
+            R.drawable.img_inalador // TODO: Usar um ícone mais apropriado
+        ));
+        
+        // Artigos sobre Poluentes
+        artigos.add(new Artigo(
+            "O que são Partículas Finas (PM2.5)?",
+            "Entenda um dos poluentes mais perigosos para a saúde respiratória.",
+            "As PM2.5 são partículas minúsculas em suspensão no ar, com diâmetro de 2.5 micrômetros ou menos. Por serem tão pequenas, elas podem penetrar profundamente nos pulmões e até mesmo na corrente sanguínea, causando inflamação, agravando a asma e aumentando o risco de problemas cardiovasculares.",
+            R.drawable.img_inalador // TODO: Usar um ícone mais apropriado
         ));
         artigos.add(new Artigo(
-                "Como Limpar seu Espaçador",
-                "Um guia passo a passo para manter seu espaçador limpo e seguro.",
-                "Limpar seu espaçador é crucial para evitar o acúmulo de mofo e bactérias. Desmonte-o e lave as peças em água morna com um pouco de detergente neutro. Enxágue bem e deixe secar completamente ao ar livre, sem usar panos. A limpeza deve ser feita pelo menos uma vez por semana.",
-                R.drawable.img_inalador
+            "O que são Partículas Inaláveis (PM10)?",
+            "Saiba mais sobre as partículas maiores, mas ainda perigosas.",
+            "As PM10 são partículas com diâmetro de 10 micrômetros ou menos. Elas são maiores que as PM2.5, mas ainda podem ser inaladas e se alojar nos pulmões, causando irritação nas vias aéreas, tosse, e dificuldade para respirar, especialmente em pessoas com asma.",
+            R.drawable.img_inalador // TODO: Usar um ícone mais apropriado
         ));
         artigos.add(new Artigo(
-                "Exercícios de Respiração",
-                "Técnicas de respiração que podem ajudar a controlar os sintomas.",
-                "Exercícios como a respiração diafragmática podem fortalecer seus pulmões. Sente-se confortavelmente, coloque uma mão no peito e outra na barriga. Inspire lentamente pelo nariz, sentindo sua barriga se expandir. Expire lentamente pela boca. Praticar de 5 a 10 minutos por dia pode ajudar a melhorar sua capacidade respiratória e a gerenciar a falta de ar.",
-                R.drawable.img_inalador
+            "O que é o Ozônio (O₃)?",
+            "Conheça o 'poluente do bom tempo' e seus riscos.",
+            "O ozônio ao nível do solo é um gás irritante formado pela reação da luz solar com outros poluentes. Ele é um dos principais componentes da 'névoa fotoquímica' e pode causar dor no peito, tosse, irritação na garganta e agravar doenças respiratórias como a asma.",
+            R.drawable.img_inalador // TODO: Usar um ícone mais apropriado
         ));
         artigos.add(new Artigo(
-                "Gatilhos Comuns da Asma",
-                "Identifique e evite os gatilhos mais comuns que podem levar a uma crise.",
-                "Os gatilhos da asma variam de pessoa para pessoa, mas os mais comuns incluem poeira, pólen, mofo, pelos de animais, fumaça de cigarro, poluição do ar, ar frio e exercícios intensos. Manter um diário de sintomas pode ajudá-lo a identificar seus gatilhos específicos para que você possa evitá-los de forma mais eficaz.",
-                R.drawable.img_inalador
+            "O que é o Dióxido de Nitrogênio (NO₂)?",
+            "Entenda este gás comum em áreas urbanas.",
+            "O NO₂ é um gás avermelhado-marrom emitido principalmente pela queima de combustíveis em veículos e usinas de energia. A exposição a curto prazo pode agravar doenças respiratórias, enquanto a exposição a longo prazo pode contribuir para o desenvolvimento de asma.",
+            R.drawable.img_inalador // TODO: Usar um ícone mais apropriado
         ));
         artigos.add(new Artigo(
-                "Plano de Ação para Asma",
-                "Aprenda a criar um plano de ação personalizado com seu médico.",
-                "Um plano de ação para asma é um guia escrito que você desenvolve com seu médico. Ele detalha seus medicamentos diários, como lidar com o agravamento dos sintomas e o que fazer em caso de uma crise de asma. Ter um plano claro e acessível é uma das ferramentas mais importantes para gerenciar sua condição com segurança.",
-                R.drawable.img_inalador
+            "O que é o Dióxido de Enxofre (SO₂)?",
+            "Saiba mais sobre este poluente industrial.",
+            "O SO₂ é um gás incolor com um cheiro forte, emitido principalmente pela queima de combustíveis fósseis em usinas de energia e processos industriais. Ele pode irritar o sistema respiratório e agravar a asma, especialmente durante atividades físicas.",
+            R.drawable.img_inalador // TODO: Usar um ícone mais apropriado
         ));
+        artigos.add(new Artigo(
+            "O que é o Monóxido de Carbono (CO)?",
+            "Conheça os perigos do 'assassino silencioso'.",
+            "O CO é um gás inodoro e incolor produzido pela queima incompleta de combustíveis. Em altas concentrações, ele reduz a quantidade de oxigênio que pode ser transportada no sangue, o que é especialmente perigoso para pessoas com doenças cardíacas e respiratórias.",
+            R.drawable.img_inalador // TODO: Usar um ícone mais apropriado
+        ));
+
+        // Artigos Originais
+        artigos.add(new Artigo("Aonde Guardar seu Inalador", "Um guia sobre os melhores locais para armazenar seu inalador.", "...", R.drawable.img_inalador));
+        artigos.add(new Artigo("Como Limpar seu Espaçador", "Um guia passo a passo para manter seu espaçador limpo.", "...", R.drawable.img_inalador));
     }
 
     private void adicionarArtigo(final Artigo artigo) {
@@ -111,21 +132,15 @@ public class Educativo extends Fragment {
 
     private void showArtigoDialog(String titulo, String conteudo) {
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_artigo_educativo, null);
-
         TextView dialogTitulo = dialogView.findViewById(R.id.dialog_titulo);
         TextView dialogConteudo = dialogView.findViewById(R.id.dialog_conteudo);
         Button dialogBtnFechar = dialogView.findViewById(R.id.dialog_btn_fechar);
-
         dialogTitulo.setText(titulo);
         dialogConteudo.setText(conteudo);
-
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setView(dialogView);
-
         final AlertDialog alertDialog = builder.create();
-
         dialogBtnFechar.setOnClickListener(v_fechar -> alertDialog.dismiss());
-
         alertDialog.show();
     }
 

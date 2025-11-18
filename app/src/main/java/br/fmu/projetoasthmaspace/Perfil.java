@@ -1,12 +1,19 @@
 package br.fmu.projetoasthmaspace;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import br.fmu.projetoasthmaspace.databinding.ActivityPerfilBinding;
@@ -14,6 +21,15 @@ import br.fmu.projetoasthmaspace.databinding.ActivityPerfilBinding;
 public class Perfil extends Fragment {
 
     private ActivityPerfilBinding binding;
+
+    private final ActivityResultLauncher<String> getContentLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            (Uri uri) -> {
+                if (uri != null) {
+                    binding.imgPerfil.setImageURI(uri);
+                }
+            }
+    );
 
     @Nullable
     @Override
@@ -25,7 +41,36 @@ public class Perfil extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // Lógica do fragmento de Perfil aqui
+
+        carregarDadosDoPerfil();
+
+        binding.imgPerfil.setOnClickListener(v -> {
+            getContentLauncher.launch("image/*");
+        });
+
+        binding.btnSair.setOnClickListener(v -> {
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Sair do Aplicativo")
+                    .setMessage("Deseja realmente sair?")
+                    .setPositiveButton("Sim", (dialog, which) -> {
+                        Intent intent = new Intent(getActivity(), Login.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        getActivity().finish();
+                    })
+                    .setNegativeButton("Não", null)
+                    .show();
+        });
+    }
+
+    private void carregarDadosDoPerfil() {
+        // Carrega o nome do usuário salvo
+        SharedPreferences prefs = requireActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        String nomeCompleto = prefs.getString("user_name", null);
+
+        if (nomeCompleto != null && !nomeCompleto.trim().isEmpty()) {
+            binding.textName.setText(nomeCompleto);
+        }
     }
 
     @Override

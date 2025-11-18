@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -15,7 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import br.fmu.projetoasthmaspace.databinding.ActivityCadastrarBinding;
 
-public class Cadastrar extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
+public class Cadastrar extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     private ActivityCadastrarBinding binding;
 
@@ -29,7 +28,16 @@ public class Cadastrar extends AppCompatActivity implements AdapterView.OnItemSe
         binding.spinnerSexo.setOnItemSelectedListener(this);
 
         binding.btnContinuar.setOnClickListener(v -> {
+            String nomeCompleto = binding.editTextNomeCompleto.getText().toString();
+
+            if (nomeCompleto.trim().isEmpty()) {
+                Toast.makeText(this, "Por favor, insira seu nome completo.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Intent intent = new Intent(Cadastrar.this, InfAdicionais.class);
+            // Passa o nome para a próxima tela
+            intent.putExtra("USER_NAME", nomeCompleto);
             startActivity(intent);
         });
 
@@ -41,13 +49,12 @@ public class Cadastrar extends AppCompatActivity implements AdapterView.OnItemSe
     }
 
     @Override
-    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        // Opcional: mostrar um Toast ao selecionar um item no Spinner
-        // Toast.makeText(this, adapterView.getItemAtPosition(i).toString(), Toast.LENGTH_SHORT).show();
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        // Lógica para quando um item do spinner é selecionado
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> adapterView) {
-
+    public void onNothingSelected(AdapterView<?> parent) {
+        // Lógica para quando nada é selecionado
     }
 }
