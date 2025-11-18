@@ -41,9 +41,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="30dp"
             android:paddingTop="35dp"
-            android:paddingRight="30dp"
             android:paddingBottom="35dp">
 
             <ImageView
@@ -57,49 +55,46 @@
 
             <TextView
                 android:id="@+id/textSlogan"
-                android:layout_width="324dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
                 android:layout_marginTop="30dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
+                android:layout_marginEnd="30dp"
                 android:text="Seja bem-vindo ao Asthma Space"
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="26dp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/imglogo" />
 
             <TextView
                 android:id="@+id/textInforme"
-                android:layout_width="324dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
                 android:layout_marginTop="10dp"
-                android:paddingLeft="30dp"
-                android:paddingRight="30dp"
+                android:layout_marginEnd="30dp"
                 android:text="Faça o seu cadastro!"
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="17dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textSlogan" />
 
+            <!-- Início do Formulário Alinhado -->
+
             <TextView
                 android:id="@+id/textNomeCompleto"
-                android:layout_width="324dp"
+                android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:paddingLeft="22dp"
-                android:paddingRight="22dp"
                 android:text="Nome Completo *"
                 android:textColor="@color/white"
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textInforme" />
 
@@ -116,22 +111,18 @@
                 android:textColorHint="@color/white"
                 android:textSize="12dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textNomeCompleto" />
 
             <TextView
                 android:id="@+id/textEmail"
-                android:layout_width="324dp"
+                android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:paddingLeft="22dp"
-                android:paddingRight="22dp"
                 android:text="Email *"
                 android:textColor="@color/white"
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/editTextNomeCompleto" />
 
@@ -148,22 +139,18 @@
                 android:textColorHint="@color/white"
                 android:textSize="12dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textEmail" />
 
             <TextView
                 android:id="@+id/textCriarSenha"
-                android:layout_width="324dp"
+                android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:paddingLeft="22dp"
-                android:paddingRight="22dp"
                 android:text="Criar Senha *"
                 android:textColor="@color/white"
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/editTextEmail" />
 
@@ -180,25 +167,18 @@
                 android:textColorHint="@color/white"
                 android:textSize="12dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textCriarSenha" />
 
-
-
-
             <TextView
                 android:id="@+id/textCpf"
-                android:layout_width="324dp"
+                android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:paddingLeft="22dp"
-                android:paddingRight="22dp"
                 android:text="CPF *"
                 android:textColor="@color/white"
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/editTextCriarSenha" />
 
@@ -215,22 +195,18 @@
                 android:textColorHint="@color/white"
                 android:textSize="12dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textCpf" />
 
             <TextView
                 android:id="@+id/textTelefone"
-                android:layout_width="324dp"
+                android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:paddingLeft="22dp"
-                android:paddingRight="22dp"
                 android:text="Telefone *"
                 android:textColor="@color/white"
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/editTextCpf" />
 
@@ -247,22 +223,18 @@
                 android:textColorHint="@color/white"
                 android:textSize="12dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textTelefone" />
 
             <TextView
                 android:id="@+id/textIdade"
-                android:layout_width="324dp"
+                android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:paddingLeft="22dp"
-                android:paddingRight="22dp"
                 android:text="Idade *"
                 android:textColor="@color/white"
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/editTextTelefone" />
 
@@ -279,32 +251,26 @@
                 android:textColorHint="@color/white"
                 android:textSize="12dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textIdade" />
 
             <TextView
                 android:id="@+id/textSexo"
-                android:layout_width="324dp"
+                android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:paddingLeft="22dp"
-                android:paddingRight="22dp"
                 android:text="Sexo *"
                 android:textColor="@color/white"
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/editTextIdade" />
 
             <Spinner
                 android:id="@+id/spinnerSexo"
                 android:layout_width="280dp"
-                android:layout_height="wrap_content"
-
+                android:layout_height="48dp"
                 android:layout_marginTop="5dp"
-
                 android:background="@drawable/text_box"
                 android:entries="@array/spinner_sexo"
                 android:padding="10dp"
@@ -316,18 +282,18 @@
                 android:id="@+id/btnContinuar"
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="25dp"
                 android:backgroundTint="@color/turquoise_light"
                 android:text="CONTINUAR"
                 android:textColor="@color/blue_navy"
                 android:textSize="14dp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/spinnerSexo" />
-
+            
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

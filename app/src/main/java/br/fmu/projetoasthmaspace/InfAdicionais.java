@@ -1,6 +1,7 @@
 package br.fmu.projetoasthmaspace;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -14,6 +15,7 @@ import br.fmu.projetoasthmaspace.databinding.ActivityInfAdicionaisBinding;
 public class InfAdicionais extends AppCompatActivity {
 
     private ActivityInfAdicionaisBinding binding;
+    private String nomeUsuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,9 +24,18 @@ public class InfAdicionais extends AppCompatActivity {
         binding = ActivityInfAdicionaisBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Recebe o nome da tela de Cadastro
+        nomeUsuario = getIntent().getStringExtra("USER_NAME");
+
         binding.btnConcluir.setOnClickListener(v -> {
+            // Salva o nome do usuário permanentemente
+            SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("user_name", nomeUsuario);
+            editor.apply();
+
+            // Navega para a tela principal
             Intent intent = new Intent(InfAdicionais.this, MainActivity.class);
-            // Limpa o histórico de navegação para que o usuário não possa voltar para as telas de cadastro
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });

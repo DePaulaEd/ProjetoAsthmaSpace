@@ -92,16 +92,13 @@
 
             <TextView
                 android:id="@+id/textEmail"
-                android:layout_width="324dp"
+                android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="25dp"
-                android:paddingLeft="22dp"
-                android:paddingRight="22dp"
                 android:text="Email"
                 android:textColor="@color/white"
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textInforme" />
 
@@ -111,30 +108,26 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:background="@drawable/text_box"
-                android:ems="10"
                 android:hint="yourname@email.com"
                 android:inputType="textEmailAddress"
                 android:padding="10dp"
-                android:textColorHint="@color/white"
+                android:textColor="@color/white"
+                android:textColorHint="#B3FFFFFF"
                 android:textSize="12dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textEmail" />
 
 
             <TextView
                 android:id="@+id/textSenha"
-                android:layout_width="324dp"
+                android:layout_width="280dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:paddingLeft="22dp"
-                android:paddingRight="22dp"
+                android:layout_marginTop="16dp"
                 android:text="Senha"
                 android:textColor="@color/white"
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/editTextEmail" />
 
@@ -144,14 +137,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:background="@drawable/text_box"
-                android:ems="10"
                 android:hint="Enter your password"
                 android:inputType="textPassword"
                 android:padding="10dp"
-                android:textColorHint="@color/white"
+                android:textColor="@color/white"
+                android:textColorHint="#B3FFFFFF"
                 android:textSize="12dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textSenha" />
 
@@ -166,7 +158,6 @@
                 android:textSize="14dp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/editTextSenha" />
 
@@ -195,6 +186,7 @@
                 android:text="@string/nao_tem_conta_cadastre_se"
                 android:textColor="@color/white"
                 android:textSize="12dp"
+                android:pointerIcon="hand"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
