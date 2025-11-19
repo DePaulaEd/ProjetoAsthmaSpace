@@ -29,15 +29,27 @@ public class Cadastrar extends AppCompatActivity implements AdapterView.OnItemSe
 
         binding.btnContinuar.setOnClickListener(v -> {
             String nomeCompleto = binding.editTextNomeCompleto.getText().toString();
+            String email = binding.editTextEmail.getText().toString();
+            String senha = binding.editTextCriarSenha.getText().toString();
+            String cpf = binding.editTextCpf.getText().toString();
+            String telefone = binding.editTextTelefone.getText().toString();
+            String idade = binding.editTextIdade.getText().toString();
+            String sexo = binding.spinnerSexo.getSelectedItem().toString();
 
-            if (nomeCompleto.trim().isEmpty()) {
-                Toast.makeText(this, "Por favor, insira seu nome completo.", Toast.LENGTH_SHORT).show();
+            if (nomeCompleto.isEmpty() || email.isEmpty() || senha.isEmpty() || cpf.isEmpty() ||
+                    telefone.isEmpty() || idade.isEmpty() || sexo.isEmpty() ) {
+                Toast.makeText(this, "Preencha todos os campos obrigatórios.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             Intent intent = new Intent(Cadastrar.this, InfAdicionais.class);
             // Passa o nome para a próxima tela
             intent.putExtra("USER_NAME", nomeCompleto);
+            intent.putExtra("email", email);
+            intent.putExtra("cpf", cpf);
+            intent.putExtra("telefone", telefone);
+            intent.putExtra("idade", idade);
+            intent.putExtra("sexo", sexo);
             startActivity(intent);
         });
 
