@@ -33,6 +33,7 @@ public class Cadastrar extends AppCompatActivity implements AdapterView.OnItemSe
             String senha = binding.editTextCriarSenha.getText().toString();
             String cpf = binding.editTextCpf.getText().toString();
             String telefone = binding.editTextTelefone.getText().toString();
+
             String idade = binding.editTextIdade.getText().toString();
             String sexo = binding.spinnerSexo.getSelectedItem().toString();
 

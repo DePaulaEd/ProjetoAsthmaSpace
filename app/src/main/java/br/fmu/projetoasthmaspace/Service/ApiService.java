@@ -21,5 +21,6 @@ public interface ApiService {
 
     @PUT("clientes/atualizar")
     Call<ClienteResponse> atualizarCliente(@Body AtualizarRequest request);
+
 }
 
