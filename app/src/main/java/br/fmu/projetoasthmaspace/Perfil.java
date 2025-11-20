@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import br.fmu.projetoasthmaspace.Domain.TokenManager;
 import br.fmu.projetoasthmaspace.databinding.ActivityPerfilBinding;
 
 public class Perfil extends Fragment {
@@ -53,14 +54,21 @@ public class Perfil extends Fragment {
                     .setTitle("Sair do Aplicativo")
                     .setMessage("Deseja realmente sair?")
                     .setPositiveButton("Sim", (dialog, which) -> {
+
+                        // 🧽 LIMPAR TOKEN AO SAIR
+                        TokenManager.clearToken(getContext());
+
+                        // 🔄 Ir para a tela de Login limpando o histórico
                         Intent intent = new Intent(getActivity(), Login.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
+
                         getActivity().finish();
                     })
                     .setNegativeButton("Não", null)
                     .show();
         });
+
     }
 
     private void carregarDadosDoPerfil() {

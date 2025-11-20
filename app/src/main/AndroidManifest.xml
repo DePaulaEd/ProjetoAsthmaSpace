@@ -5,6 +5,9 @@
     <!-- Permissões para Internet e Localização -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+
 
     <application
         android:allowBackup="true"
@@ -17,6 +20,8 @@
         android:theme="@style/Theme.ProjetoAsthmaSpace">
 
         <!-- Activity de Login é a tela de início -->
+<!--        android:name=".AppStart"-->
+            <!--Vai ser a activity principal, porem agora para testes nao -->
         <activity
             android:name=".Login"
             android:exported="true">
