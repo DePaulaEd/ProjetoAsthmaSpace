@@ -1,6 +1,9 @@
 package br.fmu.projetoasthmaspace;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
@@ -38,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
             this.data = data;
             this.concluida = false;
         }
+
+
     }
 
     public static List<Lembrete> listaDeLembretes = new ArrayList<>();
@@ -94,6 +99,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         carregarNomeUsuario();
+        criarCanal();
+
+
     }
 
     private void carregarNomeUsuario() {
@@ -136,4 +144,17 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.replace(R.id.frameLayout, fragment);
         fragmentTransaction.commit();
     }
+    private void criarCanal() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel canal = new NotificationChannel(
+                    "LEMBRETES",
+                    "Lembretes do App",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(canal);
+        }
+    }
+
 }

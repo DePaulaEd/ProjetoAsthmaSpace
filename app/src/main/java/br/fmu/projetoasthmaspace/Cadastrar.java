@@ -50,6 +50,7 @@ public class Cadastrar extends AppCompatActivity implements AdapterView.OnItemSe
             intent.putExtra("cpf", cpf);
             intent.putExtra("telefone", telefone);
             intent.putExtra("idade", idade);
+            intent.putExtra("senha", senha);
             intent.putExtra("sexo", sexo);
             startActivity(intent);
         });
