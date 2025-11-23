@@ -1,10 +1,11 @@
 package br.fmu.projetoasthmaspace;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -16,7 +17,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -24,25 +25,23 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import br.fmu.projetoasthmaspace.Domain.DiarioParser;
+import br.fmu.projetoasthmaspace.Domain.DiarioRequest;
+import br.fmu.projetoasthmaspace.Domain.DiarioResponse;
+import br.fmu.projetoasthmaspace.Service.ApiClient;
+import br.fmu.projetoasthmaspace.Service.ApiService;
 import br.fmu.projetoasthmaspace.databinding.ActivityDiarioSintomasBinding;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DiarioSintomas extends Fragment {
 
     private ActivityDiarioSintomasBinding binding;
-    private List<Anotacao> listaDeAnotacoes = new ArrayList<>();
+    private List<DiarioResponse> diario;
 
-    // Modelo de dados para uma Anotação, agora com a data completa
-    private static class Anotacao {
-        String titulo;
-        String descricao;
-        Date dataHora;
-
-        Anotacao(String titulo, String descricao, Date dataHora) {
-            this.titulo = titulo;
-            this.descricao = descricao;
-            this.dataHora = dataHora;
-        }
-    }
+    private String token;
+    private ApiService api;
 
     @Nullable
     @Override
@@ -54,168 +53,177 @@ public class DiarioSintomas extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        
-        preencherComExemplos(); // Adiciona os dados de exemplo
+
+        // PEGAR TOKEN AQUI
+        SharedPreferences prefs = requireActivity().getSharedPreferences("APP", Context.MODE_PRIVATE);
+        token = prefs.getString("TOKEN", null);
+
+
+
+        // INSTANCIAR API COM TOKEN
+        api = ApiClient.getApiService(token);
 
         binding.fabAdicionarSintoma.setOnClickListener(v -> showNovoSintomaDialog());
 
-        atualizarTela(); // Atualiza toda a interface
+        carregarDiario();
     }
 
-    private void preencherComExemplos() {
-        Calendar cal = Calendar.getInstance();
-        
-        // Hoje
-        cal.set(Calendar.HOUR_OF_DAY, 9);
-        cal.set(Calendar.MINUTE, 15);
-        listaDeAnotacoes.add(new Anotacao("Falta de ar leve", "Senti um pouco de falta de ar ao acordar.", cal.getTime()));
+    private void carregarDiario() {
+        api.listarDiario().enqueue(new Callback<List<DiarioResponse>>() {
+            @Override
+            public void onResponse(Call<List<DiarioResponse>> call, Response<List<DiarioResponse>> response) {
+                if (!isAdded()) return; // Fragment não está anexada
+                if (response.isSuccessful()) {
+                    diario = response.body();
+                    atualizarTela();
+                }
+            }
 
-        // Ontem
-        cal.add(Calendar.DAY_OF_YEAR, -1);
-        cal.set(Calendar.HOUR_OF_DAY, 22);
-        cal.set(Calendar.MINUTE, 5);
-        listaDeAnotacoes.add(new Anotacao("Tosse noturna", "Tive uma crise de tosse antes de dormir.", cal.getTime()));
-        
-        cal.set(Calendar.HOUR_OF_DAY, 14);
-        cal.set(Calendar.MINUTE, 30);
-        listaDeAnotacoes.add(new Anotacao("Chiado no peito", "Chiado leve durante a tarde, usei a bombinha.", cal.getTime()));
-
-        // Anteontem
-        cal.add(Calendar.DAY_OF_YEAR, -1);
-        cal.set(Calendar.HOUR_OF_DAY, 8);
-        cal.set(Calendar.MINUTE, 0);
-        listaDeAnotacoes.add(new Anotacao("Nenhum sintoma", "Acordei bem, sem sintomas aparentes.", cal.getTime()));
+            @Override
+            public void onFailure(Call<List<DiarioResponse>> call, Throwable t) {
+                if (!isAdded()) return;
+                Toast.makeText(getContext(), "Erro ao carregar diário", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
-    
+
+
     private void atualizarTela() {
-        // Define a data atual no cabeçalho "Hoje"
-        SimpleDateFormat formatadorDataHoje = new SimpleDateFormat("dd 'de' MMMM", Locale.getDefault());
-        binding.textDataAtual.setText(formatadorDataHoje.format(new Date()));
+        if (diario == null || binding == null) return;
 
-        // Separa as anotações
-        List<Anotacao> anotacoesDeHoje;
-        Map<String, List<Anotacao>> anotacoesAnterioresAgrupadas;
+        SimpleDateFormat dfHoje = new SimpleDateFormat("dd 'de' MMMM", Locale.getDefault());
+        binding.textDataAtual.setText(dfHoje.format(new Date()));
 
-        SimpleDateFormat formatadorDataChave = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        
-        anotacoesDeHoje = listaDeAnotacoes.stream()
-                .filter(a -> isToday(a.dataHora))
+        List<DiarioResponse> hoje = diario.stream()
+                .filter(d -> DiarioParser.isToday(d.data))
                 .collect(Collectors.toList());
 
-        anotacoesAnterioresAgrupadas = listaDeAnotacoes.stream()
-                .filter(a -> !isToday(a.dataHora))
-                .collect(Collectors.groupingBy(a -> formatadorDataChave.format(a.dataHora)));
-                
-        // Exibe as anotações
-        exibirAnotacoes(binding.containerAnotacoesHoje, anotacoesDeHoje);
-        exibirDatasAnteriores(anotacoesAnterioresAgrupadas);
-    }
-    
-    private boolean isToday(Date date) {
-        Calendar hoje = Calendar.getInstance();
-        Calendar dataAnotacao = Calendar.getInstance();
-        dataAnotacao.setTime(date);
-        return hoje.get(Calendar.YEAR) == dataAnotacao.get(Calendar.YEAR) &&
-               hoje.get(Calendar.DAY_OF_YEAR) == dataAnotacao.get(Calendar.DAY_OF_YEAR);
+        Map<String, List<DiarioResponse>> anteriores = diario.stream()
+                .filter(d -> !DiarioParser.isToday(d.data))
+                .collect(Collectors.groupingBy(d -> d.data));
+
+        exibirAnotacoes(binding.containerAnotacoesHoje, hoje);
+        exibirDatasAnteriores(anteriores);
     }
 
-    private void exibirAnotacoes(LinearLayout container, List<Anotacao> anotacoes) {
+
+
+
+    private void exibirAnotacoes(LinearLayout container, List<DiarioResponse> lista) {
         container.removeAllViews();
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        SimpleDateFormat formatadorHorario = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
-        for (Anotacao anotacao : anotacoes) {
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        SimpleDateFormat formatoHora = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
+        for (DiarioResponse resp : lista) {
             View itemView = inflater.inflate(R.layout.item_anotacao_diario, container, false);
 
-            TextView itemHorario = itemView.findViewById(R.id.item_horario);
-            TextView itemTitulo = itemView.findViewById(R.id.item_titulo);
-            TextView itemDescricao = itemView.findViewById(R.id.item_descricao);
+            Date hora = DiarioParser.parseHorario(resp.horario);
 
-            itemHorario.setText(formatadorHorario.format(anotacao.dataHora));
-            itemTitulo.setText(anotacao.titulo);
-            itemDescricao.setText(anotacao.descricao);
+            ((TextView) itemView.findViewById(R.id.item_horario))
+                    .setText(hora != null ? formatoHora.format(hora) : resp.horario);
+
+            ((TextView) itemView.findViewById(R.id.item_titulo)).setText(resp.intensidade);
+            ((TextView) itemView.findViewById(R.id.item_descricao)).setText(resp.descricao);
 
             container.addView(itemView);
         }
     }
 
-    private void exibirDatasAnteriores(Map<String, List<Anotacao>> anotacoesAgrupadas) {
+
+    private void exibirDatasAnteriores(Map<String, List<DiarioResponse>> map) {
+
         binding.containerAnotacoesAnteriores.removeAllViews();
+
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        SimpleDateFormat formatadorDataDisplay = new SimpleDateFormat("dd 'de' MMMM 'de' yyyy", Locale.getDefault());
+        SimpleDateFormat dfDisplay = new SimpleDateFormat("dd 'de' MMMM 'de' yyyy", Locale.getDefault());
 
-        for (Map.Entry<String, List<Anotacao>> entry : anotacoesAgrupadas.entrySet()) {
-            List<Anotacao> anotacoesDoDia = entry.getValue();
-            if (anotacoesDoDia.isEmpty()) continue;
+        for (Map.Entry<String, List<DiarioResponse>> entry : map.entrySet()) {
 
-            View itemView = inflater.inflate(R.layout.item_data_anterior, binding.containerAnotacoesAnteriores, false);
-            TextView dataAnteriorText = itemView.findViewById(R.id.text_data_anterior_item);
-            
-            Date dataDoGrupo = anotacoesDoDia.get(0).dataHora;
-            dataAnteriorText.setText(formatadorDataDisplay.format(dataDoGrupo));
-            
-            itemView.setOnClickListener(v -> showDialogAnteriores(dataDoGrupo, anotacoesDoDia));
+            String dataString = entry.getKey(); // yyyy-MM-dd
+            List<DiarioResponse> lista = entry.getValue();
 
-            binding.containerAnotacoesAnteriores.addView(itemView);
+            Date dia = DiarioParser.parseData(dataString);
+
+            View item = inflater.inflate(R.layout.item_data_anterior, binding.containerAnotacoesAnteriores, false);
+
+            ((TextView) item.findViewById(R.id.text_data_anterior_item))
+                    .setText(dia != null ? dfDisplay.format(dia) : dataString);
+
+            item.setOnClickListener(v -> showDialogAnteriores(dia, lista));
+
+            binding.containerAnotacoesAnteriores.addView(item);
         }
     }
 
-    private void showDialogAnteriores(Date data, List<Anotacao> anotacoes) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_anotacoes_anteriores, null);
 
-        TextView tituloDialog = dialogView.findViewById(R.id.dialog_data_anterior_titulo);
-        Button btnFechar = dialogView.findViewById(R.id.dialog_btn_fechar_anterior);
-        LinearLayout containerDialog = dialogView.findViewById(R.id.dialog_container_anotacoes_anteriores);
-        
-        SimpleDateFormat formatadorDataDisplay = new SimpleDateFormat("dd 'de' MMMM 'de' yyyy", Locale.getDefault());
-        tituloDialog.setText("Anotações de " + formatadorDataDisplay.format(data));
-        
-        exibirAnotacoes(containerDialog, anotacoes);
+    private void showDialogAnteriores(Date data, List<DiarioResponse> lista) {
+        AlertDialog.Builder b = new AlertDialog.Builder(getContext());
+        View dialog = getLayoutInflater().inflate(R.layout.dialog_anotacoes_anteriores, null);
 
-        builder.setView(dialogView);
-        final AlertDialog alertDialog = builder.create();
-        
-        btnFechar.setOnClickListener(v -> alertDialog.dismiss());
-        
-        alertDialog.show();
+        ((TextView) dialog.findViewById(R.id.dialog_data_anterior_titulo))
+                .setText("Anotações de " +
+                        new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                .format(data != null ? data : new Date()));
+
+        exibirAnotacoes(dialog.findViewById(R.id.dialog_container_anotacoes_anteriores), lista);
+
+        b.setView(dialog);
+        AlertDialog d = b.create();
+
+        dialog.findViewById(R.id.dialog_btn_fechar_anterior).setOnClickListener(v -> d.dismiss());
+
+        d.show();
     }
+
 
     private void showNovoSintomaDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_novo_sintoma, null);
+        View dialog = getLayoutInflater().inflate(R.layout.dialog_novo_sintoma, null);
 
-        final EditText tituloInput = dialogView.findViewById(R.id.edit_text_titulo_sintoma);
-        final EditText descricaoInput = dialogView.findViewById(R.id.edit_text_descricao_sintoma);
+        EditText titulo = dialog.findViewById(R.id.edit_text_titulo_sintoma);
+        EditText descricao = dialog.findViewById(R.id.edit_text_descricao_sintoma);
 
-        builder.setView(dialogView)
-                .setPositiveButton("Salvar", (dialog, id) -> {
-                    String titulo = tituloInput.getText().toString();
-                    String descricao = descricaoInput.getText().toString();
+        builder.setView(dialog);
 
-                    if (titulo.isEmpty() || descricao.isEmpty()) {
-                        Toast.makeText(getContext(), "Por favor, preencha todos os campos.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+        builder.setPositiveButton("Salvar", (d, i) -> {
+            String intensidade = titulo.getText().toString().trim();
+            String desc = descricao.getText().toString().trim();
 
-                    // Adicionar nova anotação à lista com a data/hora atual
-                    listaDeAnotacoes.add(new Anotacao(titulo, descricao, new Date()));
+            if (intensidade.isEmpty() || desc.isEmpty()) {
+                Toast.makeText(getContext(), "Preencha todos os campos", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-                    // Atualizar toda a interface
-                    atualizarTela();
+            registrarSintoma(intensidade, desc);
+        });
 
-                    Toast.makeText(getContext(), "Anotação salva com sucesso!", Toast.LENGTH_SHORT).show();
-                })
-                .setNegativeButton("Cancelar", (dialog, id) -> {
-                    dialog.dismiss();
-                });
+        builder.setNegativeButton("Cancelar", (d, i) -> d.dismiss());
 
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        builder.create().show();
     }
-    
+
+
+    private void registrarSintoma(String intensidade, String descricao) {
+        String data = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        String horario = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
+
+        DiarioRequest req = new DiarioRequest(data, horario, intensidade, descricao);
+
+        api.registrarSintoma(req).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> r) {
+                Toast.makeText(getContext(), "Sintoma registrado!", Toast.LENGTH_SHORT).show();
+                carregarDiario();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(getContext(), "Erro ao registrar sintoma.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();

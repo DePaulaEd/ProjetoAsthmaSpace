@@ -28,6 +28,8 @@ public class InfAdicionais extends AppCompatActivity {
     private String idade;
     private String sexo;
 
+    private String senha;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +44,7 @@ public class InfAdicionais extends AppCompatActivity {
         telefone = getIntent().getStringExtra("telefone");
         idade = getIntent().getStringExtra("idade");
         sexo = getIntent().getStringExtra("sexo");
+        senha = getIntent().getStringExtra("senha");
 
         binding.btnConcluir.setOnClickListener(v -> enviarCadastro());
     }
@@ -65,7 +68,7 @@ public class InfAdicionais extends AppCompatActivity {
                 email,                      // email
                 telefone,                   // telefone
                 cpf,                        // cpf
-                "senhaTemporaria123",       // senha (ou receba da tela)
+                senha,       // senha (ou receba da tela)
                 Integer.parseInt(idade),    // idade
                 sexo,                       // sexo
                 endereco,                   // objeto endereço
