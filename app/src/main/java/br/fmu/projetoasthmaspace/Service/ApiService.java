@@ -12,6 +12,7 @@ import br.fmu.projetoasthmaspace.Domain.Lembrete;
 import br.fmu.projetoasthmaspace.Domain.LembreteReceiver;
 import br.fmu.projetoasthmaspace.Domain.LembreteRequest;
 import br.fmu.projetoasthmaspace.Domain.LembreteResponse;
+import br.fmu.projetoasthmaspace.Domain.LembreteUpdateRequest;
 import br.fmu.projetoasthmaspace.Domain.LoginRequest;
 import br.fmu.projetoasthmaspace.Domain.TokenResponse;
 import retrofit2.Call;
@@ -61,6 +62,10 @@ public interface ApiService {
 
     @PUT("lembretes/atualizar")
     Call<Lembrete> atualizarLembrete(@Body Lembrete request);
+
+    @PUT("lembretes/atualizar")
+    Call<Void> atualizarConclusao(@Body LembreteUpdateRequest request);
+
 
     @DELETE("lembretes/delete/{id}")
     Call<Void> deletarLembrete(@Path("id") Long id);
