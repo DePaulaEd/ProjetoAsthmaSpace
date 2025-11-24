@@ -10,6 +10,8 @@ public class LembreteRequest {
         this.data = data;
         this.horario = horario;
     }
+
+
 }
 
 

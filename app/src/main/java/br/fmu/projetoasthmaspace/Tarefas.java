@@ -1,29 +1,39 @@
 package br.fmu.projetoasthmaspace;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import br.fmu.projetoasthmaspace.Domain.DiarioParser;
+import br.fmu.projetoasthmaspace.Domain.LembreteResponse;
+import br.fmu.projetoasthmaspace.Domain.LembreteUpdateRequest;
+import br.fmu.projetoasthmaspace.Service.ApiClient;
+import br.fmu.projetoasthmaspace.Service.ApiService;
 import br.fmu.projetoasthmaspace.databinding.ActivityTarefasBinding;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Tarefas extends Fragment {
 
     private ActivityTarefasBinding binding;
+    private ApiService api;
+    private String token;
+
+    private TarefasAdapter adapter;
+    private List<LembreteResponse> tarefasHoje;
 
     @Nullable
     @Override
@@ -35,67 +45,102 @@ public class Tarefas extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        SharedPreferences prefs = requireActivity().getSharedPreferences("APP", Context.MODE_PRIVATE);
+        token = prefs.getString("TOKEN", null);
+
+        api = ApiClient.getApiService(token);
+
+        binding.recyclerTarefas.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        atualizarListaDeTarefas();
+        carregarLembretesDoBackend();
     }
 
-    private void atualizarListaDeTarefas() {
-        if (binding == null) return;
+    /**
+     * 🔄 Carrega lembretes da API
+     */
+    private void carregarLembretesDoBackend() {
+        api.listarLembretes().enqueue(new Callback<List<LembreteResponse>>() {
+            @Override
+            public void onResponse(Call<List<LembreteResponse>> call, Response<List<LembreteResponse>> response) {
+                if (response.isSuccessful()) {
+                    List<LembreteResponse> todos = response.body();
+                    filtrarTarefasDeHoje(todos);
+                }
+            }
 
-        binding.containerTarefas.removeAllViews();
+            @Override
+            public void onFailure(Call<List<LembreteResponse>> call, Throwable t) { }
+        });
+    }
 
-        List<MainActivity.Lembrete> tarefasDeHoje = MainActivity.listaDeLembretes.stream()
-                .filter(lembrete -> !lembrete.concluida && isToday(lembrete.data))
-                .sorted(Comparator.comparing(lembrete -> lembrete.horario)) // Ordena por horário
+    /**
+     * 🔍 Filtra tarefas do dia (não concluídas)
+     */
+    private void filtrarTarefasDeHoje(List<LembreteResponse> lista) {
+
+        String hoje = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                .format(new java.util.Date());
+
+        tarefasHoje = lista.stream()
+                .filter(l -> !l.concluido && hoje.equals(l.data)) // compara strings de data
                 .collect(Collectors.toList());
 
-        // Atualiza o contador
-        int numeroDeTarefas = tarefasDeHoje.size();
-        if (numeroDeTarefas == 1) {
-            binding.contadorTarefas.setText("1 tarefa pendente");
-        } else {
-            binding.contadorTarefas.setText(String.format(Locale.getDefault(), "%d tarefas pendentes", numeroDeTarefas));
-        }
-
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-
-        for (MainActivity.Lembrete tarefa : tarefasDeHoje) {
-            View itemView = inflater.inflate(R.layout.item_tarefa_checkbox, binding.containerTarefas, false);
-            CheckBox checkBoxTarefa = itemView.findViewById(R.id.checkbox_tarefa);
-
-            String textoTarefa = tarefa.titulo + " - " + tarefa.horario;
-            checkBoxTarefa.setText(textoTarefa);
-
-            checkBoxTarefa.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) {
-                    new AlertDialog.Builder(getContext())
-                            .setTitle("Concluir Tarefa")
-                            .setMessage("Deseja marcar esta tarefa como concluída?")
-                            .setPositiveButton("Sim", (dialog, which) -> {
-                                tarefa.concluida = true;
-                                atualizarListaDeTarefas();
-                            })
-                            .setNegativeButton("Não", (dialog, which) -> {
-                                buttonView.setChecked(false);
-                            })
-                            .show();
-                }
-            });
-
-            binding.containerTarefas.addView(itemView);
-        }
+        atualizarUI();
     }
 
-    private boolean isToday(Date date) {
-        Calendar hoje = Calendar.getInstance();
-        Calendar dataLembrete = Calendar.getInstance();
-        dataLembrete.setTime(date);
-        return hoje.get(Calendar.YEAR) == dataLembrete.get(Calendar.YEAR) &&
-                hoje.get(Calendar.DAY_OF_YEAR) == dataLembrete.get(Calendar.DAY_OF_YEAR);
+//    private void filtrarTarefasDeHoje(List<LembreteResponse> lista) {
+//
+//        tarefasHoje = lista.stream()
+//                .filter(l -> !l.concluido) // apenas não concluídos
+//                .collect(Collectors.toList());
+//
+//        atualizarUI();
+//    }
+
+
+
+    /**
+     * Atualiza o contador e o RecyclerView
+     */
+    private void atualizarUI() {
+
+        int n = tarefasHoje.size();
+        binding.contadorTarefas.setText(
+                n == 1 ? "1 tarefa pendente" :
+                        String.format(Locale.getDefault(), "%d tarefas pendentes", n)
+        );
+
+        adapter = new TarefasAdapter(tarefasHoje, this::marcarComoConcluida);
+        binding.recyclerTarefas.setAdapter(adapter);
+    }
+
+    /**
+     * ✔ Marca tarefa como concluída
+     */
+    private void marcarComoConcluida(LembreteResponse tarefa) {
+
+        LembreteUpdateRequest req = new LembreteUpdateRequest(tarefa.id, true);
+
+        api.atualizarConclusao(req).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    tarefa.concluido = true;
+                    tarefasHoje.remove(tarefa);
+                    adapter.notifyDataSetChanged();
+                    atualizarUI();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) { }
+        });
+
     }
 
     @Override
