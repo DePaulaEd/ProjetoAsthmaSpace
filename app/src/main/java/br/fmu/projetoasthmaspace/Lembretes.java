@@ -345,8 +345,6 @@ public class Lembretes extends Fragment {
             Toast.makeText(getContext(), "Não foi possível acessar AlarmManager.", Toast.LENGTH_SHORT).show();
         }
 
-        // 6️⃣ Opcional: envia para o backend
-        enviarLembreteParaBackend(titulo, c, mensagem);
     }
 
     private void enviarLembreteParaBackend(String titulo, Calendar dataHora, String mensagem) {
