@@ -42,7 +42,9 @@
         <activity
             android:name=".InfAdicionais"
             android:exported="true" />
-        
+
+        <activity android:name=".InformacoesPessoais" android:exported="false" />
+
         <!-- Activity Principal (com os fragmentos) -->
         <activity
             android:name=".MainActivity"
