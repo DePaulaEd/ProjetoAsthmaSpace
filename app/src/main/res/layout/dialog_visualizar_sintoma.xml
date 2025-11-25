@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/blue_opaque">
+
+    <TextView
+        android:id="@+id/dialog_titulo_sintoma"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Intensidade: Forte"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/dialog_horario_sintoma"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Anotado às 14:30"
+        android:textColor="#D0FFFFFF"
+        android:textSize="14sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/blue_grayish" />
+
+    <TextView
+        android:id="@+id/dialog_descricao_sintoma"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Descrição completa dos sintomas que o usuário registrou, com todos os detalhes necessários para a visualização."
+        android:textColor="@color/white"
+        android:textSize="16sp" />
+
+</LinearLayout>
