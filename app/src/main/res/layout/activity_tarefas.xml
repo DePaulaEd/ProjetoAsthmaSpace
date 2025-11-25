@@ -6,16 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".Tarefas">
 
+    <!-- Fundo azul -->
     <ImageView
         android:id="@+id/corFundo"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/blue_navy"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
+    <!-- Imagem com baixa opacidade -->
     <ImageView
         android:id="@+id/imgFundo"
         android:layout_width="0dp"
@@ -23,44 +25,80 @@
         android:alpha="0.08"
         android:scaleType="centerCrop"
         android:src="@drawable/fundo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tarefas_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Tarefas do Dia"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <TextView
-        android:id="@+id/contador_tarefas"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="4 tarefas pendentes"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@+id/tarefas_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_tarefas"
+    <!-- CONTEÚDO SCROLLÁVEL -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_tarefas"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/contador_tarefas"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Título -->
+            <TextView
+                android:id="@+id/tarefas_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tarefas do Dia"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="12dp"/>
+
+            <!-- Contador -->
+            <TextView
+                android:id="@+id/contador_tarefas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4 tarefas pendentes"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp"/>
+
+            <!-- Lista de pendentes -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_tarefas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:layout_marginTop="16dp"/>
+
+            <!-- Título Concluídas -->
+            <TextView
+                android:id="@+id/titulo_concluidas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tarefas concluídas hoje"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp"
+                android:visibility="gone"/>
+
+            <!-- Container das concluídas -->
+            <LinearLayout
+                android:id="@+id/container_concluidas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

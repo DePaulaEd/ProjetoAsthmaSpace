@@ -6,17 +6,18 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import br.fmu.projetoasthmaspace.Domain.DiarioParser;
 import br.fmu.projetoasthmaspace.Domain.LembreteResponse;
 import br.fmu.projetoasthmaspace.Domain.LembreteUpdateRequest;
 import br.fmu.projetoasthmaspace.Service.ApiClient;
@@ -33,7 +34,8 @@ public class Tarefas extends Fragment {
     private String token;
 
     private TarefasAdapter adapter;
-    private List<LembreteResponse> tarefasHoje;
+    private List<LembreteResponse> tarefasHoje = new ArrayList<>();
+    private List<LembreteResponse> tarefasConcluidasHoje = new ArrayList<>();
 
     @Nullable
     @Override
@@ -48,7 +50,6 @@ public class Tarefas extends Fragment {
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("APP", Context.MODE_PRIVATE);
         token = prefs.getString("TOKEN", null);
-
         api = ApiClient.getApiService(token);
 
         binding.recyclerTarefas.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -60,16 +61,14 @@ public class Tarefas extends Fragment {
         carregarLembretesDoBackend();
     }
 
-    /**
-     * 🔄 Carrega lembretes da API
-     */
     private void carregarLembretesDoBackend() {
         api.listarLembretes().enqueue(new Callback<List<LembreteResponse>>() {
             @Override
             public void onResponse(Call<List<LembreteResponse>> call, Response<List<LembreteResponse>> response) {
-                if (response.isSuccessful()) {
-                    List<LembreteResponse> todos = response.body();
-                    filtrarTarefasDeHoje(todos);
+                if (!isAdded() || binding == null) return;
+
+                if (response.isSuccessful() && response.body() != null) {
+                    filtrarTarefasDeHoje(response.body());
                 }
             }
 
@@ -78,36 +77,30 @@ public class Tarefas extends Fragment {
         });
     }
 
-    /**
-     * 🔍 Filtra tarefas do dia (não concluídas)
-     */
     private void filtrarTarefasDeHoje(List<LembreteResponse> lista) {
 
         String hoje = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 .format(new java.util.Date());
 
         tarefasHoje = lista.stream()
-                .filter(l -> !l.concluido && hoje.equals(l.data)) // compara strings de data
+                .filter(l -> !l.concluido &&
+                        l.data != null &&
+                        l.data.startsWith(hoje))
+                .collect(Collectors.toList());
+
+        tarefasConcluidasHoje = lista.stream()
+                .filter(l -> l.concluido &&
+                        l.data != null &&
+                        l.data.startsWith(hoje))
                 .collect(Collectors.toList());
 
         atualizarUI();
     }
 
-//    private void filtrarTarefasDeHoje(List<LembreteResponse> lista) {
-//
-//        tarefasHoje = lista.stream()
-//                .filter(l -> !l.concluido) // apenas não concluídos
-//                .collect(Collectors.toList());
-//
-//        atualizarUI();
-//    }
 
-
-
-    /**
-     * Atualiza o contador e o RecyclerView
-     */
     private void atualizarUI() {
+
+        if (!isAdded() || binding == null) return;
 
         int n = tarefasHoje.size();
         binding.contadorTarefas.setText(
@@ -117,30 +110,85 @@ public class Tarefas extends Fragment {
 
         adapter = new TarefasAdapter(tarefasHoje, this::marcarComoConcluida);
         binding.recyclerTarefas.setAdapter(adapter);
+
+        atualizarConcluidasHoje();
     }
 
-    /**
-     * ✔ Marca tarefa como concluída
-     */
+    private void atualizarConcluidasHoje() {
+
+        if (!isAdded() || binding == null) return;
+
+        if (tarefasConcluidasHoje.isEmpty()) {
+            binding.tituloConcluidas.setVisibility(View.GONE);
+            binding.containerConcluidas.setVisibility(View.GONE);
+            return;
+        }
+
+        binding.tituloConcluidas.setVisibility(View.VISIBLE);
+        binding.containerConcluidas.setVisibility(View.VISIBLE);
+
+        binding.containerConcluidas.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+
+        for (LembreteResponse t : tarefasConcluidasHoje) {
+
+            View item = inflater.inflate(R.layout.item_tarefa_concluida, binding.containerConcluidas, false);
+            CheckBox checkbox = item.findViewById(R.id.checkbox_concluida);
+
+            checkbox.setText(t.horario + " — " + t.titulo);
+            checkbox.setChecked(true);
+
+            // texto riscado
+            checkbox.setPaintFlags(
+                    checkbox.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
+            );
+
+            checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (!isChecked) {
+
+                    // muda no modelo local
+                    t.concluido = false;
+                    tarefasConcluidasHoje.remove(t);
+                    tarefasHoje.add(t);
+
+                    atualizarUI();
+
+                    // envia para API
+                    LembreteUpdateRequest req = new LembreteUpdateRequest(t.id, false);
+                    api.atualizarConclusao(req).enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) { }
+
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) { }
+                    });
+                }
+            });
+
+            binding.containerConcluidas.addView(item);
+        }
+    }
+
     private void marcarComoConcluida(LembreteResponse tarefa) {
 
+        tarefa.concluido = true;
+
+        // atualiza local
+        tarefasHoje.remove(tarefa);
+        tarefasConcluidasHoje.add(tarefa);
+
+        atualizarUI();
+
+        // envia ao backend
         LembreteUpdateRequest req = new LembreteUpdateRequest(tarefa.id, true);
 
         api.atualizarConclusao(req).enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    tarefa.concluido = true;
-                    tarefasHoje.remove(tarefa);
-                    adapter.notifyDataSetChanged();
-                    atualizarUI();
-                }
-            }
+            public void onResponse(Call<Void> call, Response<Void> response) { }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) { }
         });
-
     }
 
     @Override
