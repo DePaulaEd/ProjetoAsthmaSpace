@@ -6,4 +6,24 @@ public class DiarioResponse {
     public String horario;
     public String intensidade;
     public String descricao;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public String getHorario() {
+        return horario;
+    }
+
+    public String getIntensidade() {
+        return intensidade;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
 }

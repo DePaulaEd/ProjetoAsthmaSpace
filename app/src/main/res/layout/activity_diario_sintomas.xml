@@ -153,16 +153,13 @@
     </ScrollView>
 
     <!-- Botão para Editar Anotação -->
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_editar_sintoma"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Editar"
-        android:textColor="@color/blue_navy"
+        android:src="@drawable/ic_edit"
         app:backgroundTint="@color/turquoise_light"
-        app:icon="@drawable/icon_edit"
-        app:iconTint="@color/blue_navy"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
