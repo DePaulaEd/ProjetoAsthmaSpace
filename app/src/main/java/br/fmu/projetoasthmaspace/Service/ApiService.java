@@ -44,8 +44,8 @@ public interface ApiService {
     @GET("diario/listar")
     Call<List<DiarioResponse>> listarDiario();
 
-    @PUT("diario/atualizar")
-    Call<DiarioResponse> atualizarDiario(@Body DiarioRequest request);
+    @PUT("diario/atualizar/{id}")
+    Call<DiarioResponse> atualizarDiario(@Path("id") Long id, @Body DiarioRequest request);
 
     @DELETE("diario/delete/{id}")
     Call<Void> deletarDiario(@Path("id") Long id);
