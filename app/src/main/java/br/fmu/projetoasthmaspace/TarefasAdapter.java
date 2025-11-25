@@ -34,9 +34,12 @@ public class TarefasAdapter extends RecyclerView.Adapter<TarefasAdapter.TarefaVi
         return new TarefaViewHolder(v);
     }
 
+
     @Override
     public void onBindViewHolder(@NonNull TarefaViewHolder holder, int position) {
         LembreteResponse tarefa = lista.get(position);
+
+        holder.checkbox.setOnCheckedChangeListener(null);
 
         holder.checkbox.setText(tarefa.titulo + " - " + tarefa.horario);
         holder.checkbox.setChecked(false);
@@ -45,6 +48,7 @@ public class TarefasAdapter extends RecyclerView.Adapter<TarefasAdapter.TarefaVi
             if (isChecked) listener.onTarefaConcluida(tarefa);
         });
     }
+
 
     @Override
     public int getItemCount() {
