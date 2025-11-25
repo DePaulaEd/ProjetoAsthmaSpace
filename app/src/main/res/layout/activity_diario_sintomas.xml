@@ -150,14 +150,31 @@
 
     </ScrollView>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <!-- Botão para Editar Anotação -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_editar_sintoma"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="Editar"
+        android:textColor="@color/blue_navy"
+        app:backgroundTint="@color/turquoise_light"
+        app:icon="@drawable/icon_edit"
+        app:iconTint="@color/blue_navy"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Botão para Adicionar Nova Anotação -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab_adicionar_sintoma"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:src="@android:drawable/ic_input_add"
+        android:text="Nova Anotação"
+        android:textColor="@color/blue_navy"
         app:backgroundTint="@color/turquoise_light"
-        app:tint="@color/blue_navy"
+        app:icon="@android:drawable/ic_input_add"
+        app:iconTint="@color/blue_navy"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

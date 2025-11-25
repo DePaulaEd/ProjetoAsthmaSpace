@@ -24,8 +24,8 @@
 
 
         <!-- Activity de Login é a tela de início -->
-<!--        android:name=".AppStart"-->
-            <!--Vai ser a activity principal, porem agora para testes nao -->
+        <!--        android:name=".AppStart"-->
+        <!--Vai ser a activity principal, porem agora para testes nao -->
         <activity
             android:name=".Login"
             android:exported="true">
