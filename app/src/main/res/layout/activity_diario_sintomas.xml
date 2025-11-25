@@ -74,6 +74,7 @@
 
             <!-- Container de Hoje -->
             <LinearLayout
+                android:id="@+id/lista_anotacoes_hoje"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/fundo_text"
@@ -118,6 +119,7 @@
 
             <!-- Container de Anteriores -->
             <LinearLayout
+                android:id="@+id/lista_anotacoes_anteriores"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"

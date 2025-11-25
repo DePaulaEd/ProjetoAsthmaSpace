@@ -4,37 +4,89 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="24dp"
-    android:background="@color/blue_navy">
+    android:background="@color/blue_opaque">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nova Anotação no Diário"
+        android:text="Título do Sintoma"
         android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"/>
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/edit_text_titulo_sintoma"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:hint="Título (ex: Senti falta de ar)"
+        android:layout_marginTop="8dp"
+        android:hint="Ex: Falta de ar, Crise noturna"
+        android:inputType="textCapSentences"
         android:textColor="@color/white"
-        android:textColorHint="#AFFFFFFF"
-        android:backgroundTint="@color/white"/>
+        android:textColorHint="#B3FFFFFF" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Intensidade"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <RadioGroup
+        android:id="@+id/radio_group_intensidade"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radio_leve"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Leve"
+            android:textColor="@color/white"
+            android:buttonTint="@color/white"/>
+
+        <RadioButton
+            android:id="@+id/radio_moderada"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Moderada"
+            android:textColor="@color/white"
+            android:buttonTint="@color/white"/>
+
+        <RadioButton
+            android:id="@+id/radio_intensa"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Intensa"
+            android:textColor="@color/white"
+            android:buttonTint="@color/white"/>
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Descrição Detalhada"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/edit_text_descricao_sintoma"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="Descreva seus sintomas..."
-        android:inputType="textMultiLine"
         android:gravity="top"
-        android:lines="4"
+        android:hint="Ex: Tosse seca, chiado no peito..."
+        android:inputType="textMultiLine"
+        android:minLines="3"
         android:textColor="@color/white"
-        android:textColorHint="#AFFFFFFF"
-        android:backgroundTint="@color/white"/>
+        android:textColorHint="#B3FFFFFF" />
 
 </LinearLayout>
