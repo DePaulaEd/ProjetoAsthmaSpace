@@ -36,6 +36,9 @@ public interface ApiService {
     @PUT("clientes/atualizar")
     Call<ClienteResponse> atualizarCliente(@Body AtualizarRequest request);
 
+    @GET("clientes/me")
+    Call<DadosDetalhamentoCliente> getMeuPerfil();
+
 
     // -------- DIÁRIO DE SINTOMAS --------
     @POST("diario/cadastro")
@@ -60,15 +63,16 @@ public interface ApiService {
     @GET("lembretes/listar")
     Call<List<LembreteResponse>> listarLembretes();
 
-    @PUT("lembretes/atualizar")
-    Call<Lembrete> atualizarLembrete(@Body Lembrete request);
 
-    @PUT("lembretes/atualizar")
+    @PUT("/lembretes/atualizar") // Verifique o endpoint correto
     Call<Void> atualizarConclusao(@Body LembreteUpdateRequest request);
 
+    @PUT("lembretes/atualizar")
+    Call<Void> atualizarDados(@Body LembreteUpdateRequest request);
 
-    @DELETE("lembretes/delete/{id}")
-    Call<Void> deletarLembrete(@Path("id") Long id);
+
+    @DELETE("/lembretes/deletar") // Verifique o endpoint correto
+    Call<Void> deletarLembrete(@Body LembreteUpdateRequest request);
 
 
 

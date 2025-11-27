@@ -14,8 +14,8 @@ public class TokenManager {
     }
 
     public static String getToken(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return prefs.getString(TOKEN_KEY, null);
+        SharedPreferences prefs = context.getSharedPreferences(SharedPreferencesKeys.PREFS_FILE_NAME, Context.MODE_PRIVATE);
+        return prefs.getString(SharedPreferencesKeys.TOKEN_KEY, null);
     }
 
     public static void clearToken(Context context) {

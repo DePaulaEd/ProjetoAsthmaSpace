@@ -20,11 +20,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import br.fmu.projetoasthmaspace.Domain.DiarioParser;
@@ -103,7 +105,11 @@ public class DiarioSintomas extends Fragment {
         if (diario == null || binding == null) return;
 
         SimpleDateFormat dfHoje = new SimpleDateFormat("dd 'de' MMMM", Locale.getDefault());
-        binding.textDataAtual.setText(dfHoje.format(new Date()));
+        dfHoje.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+
+        Date agora = Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo")).getTime();
+        binding.textDataAtual.setText(dfHoje.format(agora));
+
 
         hoje = new ArrayList<>();
         Map<String, List<DiarioResponse>> anteriores = new HashMap<>();
@@ -227,8 +233,16 @@ public class DiarioSintomas extends Fragment {
     }
 
     private void registrarSintoma(String intensidade, String descricao) {
-        String data = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        String horario = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
+        SimpleDateFormat dfData = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat dfHora = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        dfData.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+        dfHora.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+
+        Date agora = Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo")).getTime();
+
+        String data = dfData.format(agora);
+        String horario = dfHora.format(agora);
+
 
         DiarioRequest req = new DiarioRequest(data, horario, intensidade, descricao);
 

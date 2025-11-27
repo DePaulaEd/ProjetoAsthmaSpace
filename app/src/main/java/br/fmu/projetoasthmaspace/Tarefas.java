@@ -3,6 +3,7 @@ package br.fmu.projetoasthmaspace;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;  // <--- IMPORTANTE
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,11 +14,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import br.fmu.projetoasthmaspace.Domain.DiarioParser;
 import br.fmu.projetoasthmaspace.Domain.LembreteResponse;
 import br.fmu.projetoasthmaspace.Domain.LembreteUpdateRequest;
 import br.fmu.projetoasthmaspace.Service.ApiClient;
@@ -62,45 +67,78 @@ public class Tarefas extends Fragment {
     }
 
     private void carregarLembretesDoBackend() {
+
+        Log.d("TAREFAS", "Chamando API listarLembretes()...");
+
         api.listarLembretes().enqueue(new Callback<List<LembreteResponse>>() {
             @Override
             public void onResponse(Call<List<LembreteResponse>> call, Response<List<LembreteResponse>> response) {
+
+                Log.d("TAREFAS", "Resposta recebida. Sucesso? " + response.isSuccessful());
+
                 if (!isAdded() || binding == null) return;
 
                 if (response.isSuccessful() && response.body() != null) {
-                    filtrarTarefasDeHoje(response.body());
+
+                    List<LembreteResponse> lista = response.body();
+
+                    Log.d("TAREFAS", "Total de lembretes recebidos: " + lista.size());
+
+                    for (LembreteResponse l : lista) {
+                        Log.d("TAREFAS", "ITEM -> id=" + l.id +
+                                " data=" + l.data +
+                                " horario=" + l.horario +
+                                " concluído=" + l.concluido);
+                    }
+
+                    filtrarTarefasDeHoje(lista);
+
+                } else {
+                    Log.e("TAREFAS", "Erro HTTP: " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(Call<List<LembreteResponse>> call, Throwable t) { }
+            public void onFailure(Call<List<LembreteResponse>> call, Throwable t) {
+                Log.e("TAREFAS", "Falha na requisição: " + t.getMessage());
+            }
         });
     }
 
     private void filtrarTarefasDeHoje(List<LembreteResponse> lista) {
 
-        String hoje = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                .format(new java.util.Date());
+        // Calcula hoje corretamente no fuso do Brasil
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        sdf.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+        String hoje = sdf.format(new Date());
+
+        Log.d("TAREFAS", "Data de HOJE calculada: " + hoje);
 
         tarefasHoje = lista.stream()
                 .filter(l -> !l.concluido &&
                         l.data != null &&
-                        l.data.startsWith(hoje))
+                        DiarioParser.isToday(l.data))
                 .collect(Collectors.toList());
 
         tarefasConcluidasHoje = lista.stream()
                 .filter(l -> l.concluido &&
                         l.data != null &&
-                        l.data.startsWith(hoje))
+                        DiarioParser.isToday(l.data))
                 .collect(Collectors.toList());
+
+        Log.d("TAREFAS", "→ Pendentes hoje: " + tarefasHoje.size());
+        Log.d("TAREFAS", "→ Concluídas hoje: " + tarefasConcluidasHoje.size());
 
         atualizarUI();
     }
 
 
+
     private void atualizarUI() {
 
         if (!isAdded() || binding == null) return;
+
+        Log.d("TAREFAS", "Atualizando UI... Pendentes: " + tarefasHoje.size());
 
         int n = tarefasHoje.size();
         binding.contadorTarefas.setText(
@@ -118,6 +156,8 @@ public class Tarefas extends Fragment {
 
         if (!isAdded() || binding == null) return;
 
+        Log.d("TAREFAS", "Renderizando concluídas: " + tarefasConcluidasHoje.size());
+
         if (tarefasConcluidasHoje.isEmpty()) {
             binding.tituloConcluidas.setVisibility(View.GONE);
             binding.containerConcluidas.setVisibility(View.GONE);
@@ -132,13 +172,14 @@ public class Tarefas extends Fragment {
 
         for (LembreteResponse t : tarefasConcluidasHoje) {
 
+            Log.d("TAREFAS", "Exibindo concluída id=" + t.id);
+
             View item = inflater.inflate(R.layout.item_tarefa_concluida, binding.containerConcluidas, false);
             CheckBox checkbox = item.findViewById(R.id.checkbox_concluida);
 
             checkbox.setText(t.horario + " — " + t.titulo);
             checkbox.setChecked(true);
 
-            // texto riscado
             checkbox.setPaintFlags(
                     checkbox.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
             );
@@ -146,21 +187,18 @@ public class Tarefas extends Fragment {
             checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (!isChecked) {
 
-                    // muda no modelo local
+                    Log.d("TAREFAS", "Desmarcando concluída id=" + t.id);
+
                     t.concluido = false;
                     tarefasConcluidasHoje.remove(t);
                     tarefasHoje.add(t);
 
                     atualizarUI();
 
-                    // envia para API
                     LembreteUpdateRequest req = new LembreteUpdateRequest(t.id, false);
                     api.atualizarConclusao(req).enqueue(new Callback<Void>() {
-                        @Override
-                        public void onResponse(Call<Void> call, Response<Void> response) { }
-
-                        @Override
-                        public void onFailure(Call<Void> call, Throwable t) { }
+                        @Override public void onResponse(Call<Void> call, Response<Void> response) { }
+                        @Override public void onFailure(Call<Void> call, Throwable t) { }
                     });
                 }
             });
@@ -171,23 +209,20 @@ public class Tarefas extends Fragment {
 
     private void marcarComoConcluida(LembreteResponse tarefa) {
 
+        Log.d("TAREFAS", "Marcando como concluída id=" + tarefa.id);
+
         tarefa.concluido = true;
 
-        // atualiza local
         tarefasHoje.remove(tarefa);
         tarefasConcluidasHoje.add(tarefa);
 
         atualizarUI();
 
-        // envia ao backend
         LembreteUpdateRequest req = new LembreteUpdateRequest(tarefa.id, true);
 
         api.atualizarConclusao(req).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) { }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) { }
+            @Override public void onResponse(Call<Void> call, Response<Void> response) { }
+            @Override public void onFailure(Call<Void> call, Throwable t) { }
         });
     }
 
