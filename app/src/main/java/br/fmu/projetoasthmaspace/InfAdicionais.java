@@ -79,6 +79,7 @@ public class InfAdicionais extends AppCompatActivity {
 
         ApiService api = ApiClient.getApiService();
 
+
         api.cadastrarCliente(dados).enqueue(new Callback<DadosDetalhamentoCliente>() {
             @Override
             public void onResponse(Call<DadosDetalhamentoCliente> call, Response<DadosDetalhamentoCliente> response) {

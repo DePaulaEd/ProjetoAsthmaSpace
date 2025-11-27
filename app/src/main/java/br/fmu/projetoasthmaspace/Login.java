@@ -8,6 +8,7 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.UnderlineSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -19,6 +20,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import br.fmu.projetoasthmaspace.Domain.LoginRequest;
+import br.fmu.projetoasthmaspace.Domain.SharedPreferencesKeys;
 import br.fmu.projetoasthmaspace.Domain.TokenResponse;
 import br.fmu.projetoasthmaspace.Service.ApiClient;
 import br.fmu.projetoasthmaspace.Service.ApiService;
@@ -92,10 +94,14 @@ public class Login extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
 
                     String token = response.body().token;
+                    Log.d("AUTH_TOKEN", "Token Recebido e Salvo: " + token);
 
                     // SALVAR o token no SharedPreferences
-                    SharedPreferences prefs = getSharedPreferences("APP", MODE_PRIVATE);
-                    prefs.edit().putString("TOKEN", token).apply();
+                    SharedPreferences prefs = getSharedPreferences(SharedPreferencesKeys.PREFS_FILE_NAME, MODE_PRIVATE);
+                    prefs.edit().putString(SharedPreferencesKeys.TOKEN_KEY, token).apply();
+                    Log.d("AUTH_TOKEN", "Token Salvo: " + token);
+
+                    //Toast
 
                     Toast.makeText(Login.this, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show();
 
