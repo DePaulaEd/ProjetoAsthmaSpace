@@ -1,4 +1,4 @@
-package br.fmu.projetoasthmaspace;
+package br.fmu.projetoasthmaspace.ActivityView;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import br.fmu.projetoasthmaspace.Domain.DiarioParser;
 import br.fmu.projetoasthmaspace.Domain.LembreteResponse;
 import br.fmu.projetoasthmaspace.Domain.LembreteUpdateRequest;
+import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.Service.ApiClient;
 import br.fmu.projetoasthmaspace.Service.ApiService;
 import br.fmu.projetoasthmaspace.databinding.ActivityTarefasBinding;

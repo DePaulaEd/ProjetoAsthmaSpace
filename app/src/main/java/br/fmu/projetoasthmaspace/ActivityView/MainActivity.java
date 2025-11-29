@@ -1,4 +1,4 @@
-package br.fmu.projetoasthmaspace;
+package br.fmu.projetoasthmaspace.ActivityView;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.View;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
@@ -23,6 +22,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {

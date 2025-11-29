@@ -1,4 +1,4 @@
-package br.fmu.projetoasthmaspace;
+package br.fmu.projetoasthmaspace.ActivityView;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
@@ -18,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.databinding.FragmentEducativoBinding;
 
 public class Educativo extends Fragment {

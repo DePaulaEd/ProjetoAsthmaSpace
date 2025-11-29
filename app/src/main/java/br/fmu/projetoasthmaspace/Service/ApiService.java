@@ -36,6 +36,9 @@ public interface ApiService {
     @PUT("clientes/atualizar")
     Call<ClienteResponse> atualizarCliente(@Body AtualizarRequest request);
 
+    @PUT("clientes/atualizar")
+    Call<DadosDetalhamentoCliente> atualizarPerfil(@Body AtualizarRequest request);
+
     @GET("clientes/me")
     Call<DadosDetalhamentoCliente> getMeuPerfil();
 
@@ -47,7 +50,7 @@ public interface ApiService {
     @GET("diario/listar")
     Call<List<DiarioResponse>> listarDiario();
 
-    @PUT("diario/atualizar/{id}")
+    @PUT("diario/atualizar")
     Call<DiarioResponse> atualizarDiario(@Path("id") Long id, @Body DiarioRequest request);
 
     @DELETE("diario/delete/{id}")
@@ -71,8 +74,8 @@ public interface ApiService {
     Call<Void> atualizarDados(@Body LembreteUpdateRequest request);
 
 
-    @DELETE("/lembretes/deletar") // Verifique o endpoint correto
-    Call<Void> deletarLembrete(@Body LembreteUpdateRequest request);
+    @DELETE("/lembretes/deletar/{id}") // Verifique o endpoint correto
+    Call<Void> deletarLembrete(@Path("id") Long id);
 
 
 

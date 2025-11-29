@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DiarioSintomas">
+    tools:context=".ActivityView.DiarioSintomas">
 
     <!-- Fundo Padrão -->
     <ImageView
@@ -153,15 +153,15 @@
     </ScrollView>
 
     <!-- Botão para Editar Anotação -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_editar_sintoma"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_edit"
-        app:backgroundTint="@color/turquoise_light"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+<!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+<!--        android:id="@+id/fab_editar_sintoma"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_margin="16dp"-->
+<!--        android:src="@drawable/ic_edit"-->
+<!--        app:backgroundTint="@color/turquoise_light"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent" />-->
 
     <!-- Botão para Adicionar Nova Anotação -->
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton

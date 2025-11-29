@@ -1,4 +1,4 @@
-package br.fmu.projetoasthmaspace;
+package br.fmu.projetoasthmaspace.ActivityView;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -16,8 +16,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -32,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import br.fmu.projetoasthmaspace.Domain.DiarioParser;
 import br.fmu.projetoasthmaspace.Domain.DiarioRequest;
 import br.fmu.projetoasthmaspace.Domain.DiarioResponse;
+import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.Service.ApiClient;
 import br.fmu.projetoasthmaspace.Service.ApiService;
 import br.fmu.projetoasthmaspace.databinding.ActivityDiarioSintomasBinding;
@@ -64,7 +63,7 @@ public class DiarioSintomas extends Fragment {
         api = ApiClient.getApiService(token);
 
         binding.fabAdicionarSintoma.setOnClickListener(v -> showNovoSintomaDialog());
-        binding.fabEditarSintoma.setOnClickListener(v -> toggleEditMode());
+//        binding.fabEditarSintoma.setOnClickListener(v -> toggleEditMode());
 
         carregarDiario();
     }
@@ -74,7 +73,7 @@ public class DiarioSintomas extends Fragment {
             salvarAlteracoes();
         } else {
             isEditMode = true;
-            binding.fabEditarSintoma.setImageResource(R.drawable.ic_save);
+//            binding.fabEditarSintoma.setImageResource(R.drawable.ic_save);
             binding.fabAdicionarSintoma.setVisibility(View.GONE);
             exibirAnotacoes(binding.containerAnotacoesHoje, hoje, true);
         }
@@ -151,7 +150,7 @@ public class DiarioSintomas extends Fragment {
                 SimpleDateFormat formatoHora = new SimpleDateFormat("HH:mm", Locale.getDefault());
                 Date hora = DiarioParser.parseHorario(resp.getHorario());
                 itemHorario.setText(hora != null ? formatoHora.format(hora) : resp.getHorario());
-                itemTitulo.setText("Intensidade: " + resp.getIntensidade());
+                itemTitulo.setText("Causa: " + resp.getIntensidade());
                 itemDescricao.setText(resp.getDescricao() != null ? resp.getDescricao() : "");
 
                 itemView.setOnClickListener(v -> {
@@ -265,7 +264,7 @@ public class DiarioSintomas extends Fragment {
     }
 
     private void salvarAlteracoes() {
-        binding.fabEditarSintoma.setEnabled(false);
+//        binding.fabEditarSintoma.setEnabled(false);
 
         final List<DiarioResponse> changedItems = new ArrayList<>();
         final List<DiarioRequest> requests = new ArrayList<>();
@@ -326,8 +325,8 @@ public class DiarioSintomas extends Fragment {
         if (!isAdded()) return;
 
         isEditMode = false;
-        binding.fabEditarSintoma.setEnabled(true);
-        binding.fabEditarSintoma.setImageResource(R.drawable.ic_edit);
+//        binding.fabEditarSintoma.setEnabled(true);
+//        binding.fabEditarSintoma.setImageResource(R.drawable.ic_edit);
         binding.fabAdicionarSintoma.setVisibility(View.VISIBLE);
 
         if (errors == null) {
