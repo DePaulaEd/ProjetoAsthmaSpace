@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
-import br.fmu.projetoasthmaspace.Login;
+import br.fmu.projetoasthmaspace.ActivityView.Login;
 
 public class LogoutUtil {
 

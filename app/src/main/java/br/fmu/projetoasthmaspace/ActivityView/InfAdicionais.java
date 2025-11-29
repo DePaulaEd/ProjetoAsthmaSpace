@@ -1,4 +1,4 @@
-package br.fmu.projetoasthmaspace;
+package br.fmu.projetoasthmaspace.ActivityView;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -62,16 +62,16 @@ public class InfAdicionais extends AppCompatActivity {
                 binding.editTextCidade.getText().toString()
         );
 
-        // Criar o corpo completo do JSON
+
         DadosCadastroCliente dados = new DadosCadastroCliente(
-                nomeUsuario,                // nome
-                email,                      // email
-                telefone,                   // telefone
-                cpf,                        // cpf
-                senha,       // senha (ou receba da tela)
-                Integer.parseInt(idade),    // idade
-                sexo,                       // sexo
-                endereco,                   // objeto endereço
+                nomeUsuario,
+                email,
+                telefone,
+                cpf,
+                senha,
+                Integer.parseInt(idade),
+                sexo,
+                endereco,
                 binding.editTextProblemRespiratorios.getText().toString(),
                 binding.editTextMedicamentos.getText().toString(),
                 binding.editTextContatoEmerg.getText().toString()

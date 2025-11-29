@@ -1,4 +1,4 @@
-package br.fmu.projetoasthmaspace;
+package br.fmu.projetoasthmaspace.ActivityView;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +12,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.databinding.ActivityCadastrarBinding;
 
 public class Cadastrar extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -64,11 +65,11 @@ public class Cadastrar extends AppCompatActivity implements AdapterView.OnItemSe
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        // Lógica para quando um item do spinner é selecionado
+
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-        // Lógica para quando nada é selecionado
+
     }
 }

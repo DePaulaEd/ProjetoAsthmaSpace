@@ -5,8 +5,8 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import br.fmu.projetoasthmaspace.Login;
-import br.fmu.projetoasthmaspace.TelaInicial;
+import br.fmu.projetoasthmaspace.ActivityView.Login;
+import br.fmu.projetoasthmaspace.ActivityView.TelaInicial;
 
 public class AppStart extends AppCompatActivity {
     @Override

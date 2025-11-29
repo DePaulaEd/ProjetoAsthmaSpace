@@ -1,4 +1,4 @@
-package br.fmu.projetoasthmaspace;
+package br.fmu.projetoasthmaspace.ActivityView;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,6 +22,7 @@ import androidx.core.view.WindowInsetsCompat;
 import br.fmu.projetoasthmaspace.Domain.LoginRequest;
 import br.fmu.projetoasthmaspace.Domain.SharedPreferencesKeys;
 import br.fmu.projetoasthmaspace.Domain.TokenResponse;
+import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.Service.ApiClient;
 import br.fmu.projetoasthmaspace.Service.ApiService;
 import br.fmu.projetoasthmaspace.databinding.ActivityLoginBinding;
@@ -40,7 +41,7 @@ public class Login extends AppCompatActivity {
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // BOTÃO ENTRAR
+
         binding.btnEntrar.setOnClickListener(v -> fazerLogin());
 
         // Link "Cadastre-se!"
@@ -74,7 +75,7 @@ public class Login extends AppCompatActivity {
         });
     }
 
-    // MÉTODO DO LOGIN (PASSO 4)
+
     private void fazerLogin() {
         String email = binding.editTextEmail.getText().toString();
         String senha = binding.editTextSenha.getText().toString();
@@ -96,12 +97,12 @@ public class Login extends AppCompatActivity {
                     String token = response.body().token;
                     Log.d("AUTH_TOKEN", "Token Recebido e Salvo: " + token);
 
-                    // SALVAR o token no SharedPreferences
+
                     SharedPreferences prefs = getSharedPreferences(SharedPreferencesKeys.PREFS_FILE_NAME, MODE_PRIVATE);
                     prefs.edit().putString(SharedPreferencesKeys.TOKEN_KEY, token).apply();
                     Log.d("AUTH_TOKEN", "Token Salvo: " + token);
 
-                    //Toast
+
 
                     Toast.makeText(Login.this, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show();
 

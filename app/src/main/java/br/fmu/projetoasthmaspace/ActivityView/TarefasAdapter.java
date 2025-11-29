@@ -1,4 +1,4 @@
-package br.fmu.projetoasthmaspace;
+package br.fmu.projetoasthmaspace.ActivityView;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import br.fmu.projetoasthmaspace.Domain.LembreteResponse;
+import br.fmu.projetoasthmaspace.R;
 
 public class TarefasAdapter extends RecyclerView.Adapter<TarefasAdapter.TarefaViewHolder> {
 

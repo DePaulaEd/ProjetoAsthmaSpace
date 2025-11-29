@@ -27,7 +27,7 @@
         <!--        android:name=".AppStart"-->
         <!--Vai ser a activity principal, porem agora para testes nao -->
         <activity
-            android:name=".Login"
+            android:name=".ActivityView.Login"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -37,17 +37,19 @@
 
         <!-- Outras Activities do fluxo de cadastro -->
         <activity
-            android:name=".Cadastrar"
+            android:name=".ActivityView.Cadastrar"
             android:exported="true" />
         <activity
-            android:name=".InfAdicionais"
+            android:name=".ActivityView.InfAdicionais"
             android:exported="true" />
 
-        <activity android:name=".InformacoesPessoais" android:exported="false" />
+        <activity android:name=".ActivityView.InformacoesPessoais" android:exported="false" />
+
+        <activity android:name=".ActivityView.EditarInformacoes" android:exported="false" />
 
         <!-- Activity Principal (com os fragmentos) -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ActivityView.MainActivity"
             android:exported="false" />
 
     </application>

@@ -1,9 +1,8 @@
-package br.fmu.projetoasthmaspace;
+package br.fmu.projetoasthmaspace.ActivityView;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -36,7 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import br.fmu.projetoasthmaspace.Domain.Lembrete;
 import br.fmu.projetoasthmaspace.Domain.LembreteReceiver;
@@ -44,6 +42,7 @@ import br.fmu.projetoasthmaspace.Domain.LembreteRequest;
 import br.fmu.projetoasthmaspace.Domain.LembreteResponse;
 import br.fmu.projetoasthmaspace.Domain.LembreteUpdateRequest;
 import br.fmu.projetoasthmaspace.Domain.TokenManager;
+import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.Service.ApiClient;
 import br.fmu.projetoasthmaspace.Service.ApiService;
 import br.fmu.projetoasthmaspace.databinding.ActivityLembretesBinding;
@@ -115,6 +114,7 @@ public class Lembretes extends Fragment {
         api.listarLembretes().enqueue(new Callback<List<LembreteResponse>>() {
             @Override
             public void onResponse(Call<List<LembreteResponse>> call, Response<List<LembreteResponse>> response) {
+
                 if (response.isSuccessful() && response.body() != null) {
                     new Thread(() -> {
                         List<Lembrete> tempLista = new ArrayList<>();
@@ -219,46 +219,56 @@ public class Lembretes extends Fragment {
         });
     }
 
-    private void deletarLembrete(Long id) {
-
+    private void mostrarDialogoExcluir(Long id) {
         if (id == null) {
             Log.e("DELETE", "ID DO LEMBRETE É NULO!");
             return;
         }
 
-        Context ctx = requireContext();
+        Context ctx = getContext();
+        if (ctx == null) return;
 
-        String currentToken = TokenManager.getToken(ctx);
-        if (currentToken == null) {
+        new AlertDialog.Builder(ctx)
+                .setTitle("Excluir Lembrete")
+                .setMessage("Tem certeza que deseja excluir este lembrete?")
+                .setPositiveButton("Excluir", (dialog, which) -> deletarLembrete(id))
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void deletarLembrete(Long id) {
+        Context ctx = getContext();
+        if (ctx == null) return;
+
+        String token = TokenManager.getToken(ctx);
+        if (token == null) {
             Toast.makeText(ctx, "Erro: Token inválido.", Toast.LENGTH_LONG).show();
             return;
         }
 
-        ApiService apiAutenticada = ApiClient.getApiService(currentToken);
+        ApiService api = ApiClient.getApiService(token);
 
-        Log.d("DELETE_CHECK", "Enviando DELETE para excluir lembrete ID: " + id);
 
-        // --- REQUISIÇÃO CORRETA SOMENTE COM ID ---
         LembreteUpdateRequest body = new LembreteUpdateRequest();
-        body.setId(id); // <-- garantido
+        body.setId(id);
 
-        apiAutenticada.deletarLembrete(body).enqueue(new Callback<Void>() {
+        api.deletarLembrete(id).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (!isAdded()) return;
 
                 if (response.isSuccessful()) {
-                    Toast.makeText(requireContext(), "Lembrete excluído!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Lembrete excluído!", Toast.LENGTH_SHORT).show();
                     carregarLembretesDoBackend();
                 } else {
-                    Toast.makeText(requireContext(), "Erro ao excluir (" + response.code() + ")", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Erro ao excluir (" + response.code() + ")", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 if (!isAdded()) return;
-                Toast.makeText(requireContext(), "Falha de conexão!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Falha de conexão!", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -266,7 +276,9 @@ public class Lembretes extends Fragment {
 
 
 
-    // --- Funções de UI e Lógica ---
+
+
+
 
     private void showLembreteDialog(@Nullable final Lembrete lembreteExistente) {
         final boolean isEditing = lembreteExistente != null;
@@ -367,11 +379,10 @@ public class Lembretes extends Fragment {
 
             dataHeader.setText(dataKey);
 
-            // Ordenar lembretes do dia por horário
+
             lembretesDoDia.sort(Comparator.comparing(Lembrete::getHorario));
 
-            // Configuração do ícone de exclusão de grupo (removido a exclusão em grupo do backend)
-            // Mantemos a visibilidade em modo de edição, mas o clique não faz nada de grupo
+
             if (isEditMode) {
                 deleteGroupIcon.setVisibility(View.GONE); // Desativamos a exclusão de grupo para simplificar o backend
             } else {
@@ -462,7 +473,7 @@ public class Lembretes extends Fragment {
         }
     }
 
-    // Agendamento de alarmes (do código antigo)
+
     private void agendarLembrete(int hora, int minuto, String titulo, String mensagem) {
         Calendar c = Calendar.getInstance();
         c.set(Calendar.HOUR_OF_DAY, hora);
@@ -511,7 +522,7 @@ public class Lembretes extends Fragment {
                 );
             }
 
-            // Removido o Toast, pois o "salvo" já foi exibido.
+
         } else {
             Toast.makeText(getContext(), "Não foi possível acessar AlarmManager.", Toast.LENGTH_SHORT).show();
         }
