@@ -29,7 +29,7 @@ public class InformacoesPessoais extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         String token = getSharedPreferences("APP", MODE_PRIVATE).getString("TOKEN", null);
-        api = ApiClient.getApiService(token);
+        api = ApiClient.getApiService(getApplicationContext());
 
         Log.d("INFO_PESSOAIS", "Tela aberta — sincronizando com backend");
 

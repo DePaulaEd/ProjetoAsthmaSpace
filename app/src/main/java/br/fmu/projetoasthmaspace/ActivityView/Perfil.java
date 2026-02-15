@@ -15,7 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import br.fmu.projetoasthmaspace.Domain.TokenManager;
+import br.fmu.projetoasthmaspace.Domain.UserSessionManager;
 import br.fmu.projetoasthmaspace.databinding.ActivityPerfilBinding;
 
 public class Perfil extends Fragment {
@@ -68,7 +68,8 @@ public class Perfil extends Fragment {
                     .setPositiveButton("Sim", (dialog, which) -> {
 
                         // LIMPAR TOKEN AO SAIR
-                        TokenManager.clearToken(getContext());
+                        UserSessionManager session = new UserSessionManager(getContext());
+                        session.clear();
 
                         // Ir para a tela de Login limpando o histórico
                         Intent intent = new Intent(getActivity(), Login.class);

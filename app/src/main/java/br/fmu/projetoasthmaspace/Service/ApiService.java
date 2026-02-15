@@ -15,6 +15,7 @@ import br.fmu.projetoasthmaspace.Domain.LembreteResponse;
 import br.fmu.projetoasthmaspace.Domain.LembreteUpdateRequest;
 import br.fmu.projetoasthmaspace.Domain.LoginRequest;
 import br.fmu.projetoasthmaspace.Domain.TokenResponse;
+import br.fmu.projetoasthmaspace.Domain.UsuarioResponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -42,6 +43,9 @@ public interface ApiService {
     @GET("clientes/me")
     Call<DadosDetalhamentoCliente> getMeuPerfil();
 
+    @GET("/usuarios/me")
+    Call<UsuarioResponse> getUsuarioLogado();
+
 
     // -------- DIÁRIO DE SINTOMAS --------
     @POST("diario/cadastro")
@@ -50,7 +54,7 @@ public interface ApiService {
     @GET("diario/listar")
     Call<List<DiarioResponse>> listarDiario();
 
-    @PUT("diario/atualizar")
+    @PUT("diario/atualizar/{id}")
     Call<DiarioResponse> atualizarDiario(@Path("id") Long id, @Body DiarioRequest request);
 
     @DELETE("diario/delete/{id}")
@@ -67,20 +71,16 @@ public interface ApiService {
     Call<List<LembreteResponse>> listarLembretes();
 
 
-    @PUT("/lembretes/atualizar") // Verifique o endpoint correto
-    Call<Void> atualizarConclusao(@Body LembreteUpdateRequest request);
+    @PUT("lembretes/atualizar/{id}")
+    Call<Void> atualizarDados(
+            @Path("id") Long id,
+            @Body LembreteUpdateRequest request
+    );
 
-    @PUT("lembretes/atualizar")
-    Call<Void> atualizarDados(@Body LembreteUpdateRequest request);
 
 
     @DELETE("/lembretes/deletar/{id}") // Verifique o endpoint correto
     Call<Void> deletarLembrete(@Path("id") Long id);
-
-
-
-
-
 
 
 
