@@ -15,6 +15,9 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildConfigField("String", "API_KEY", "\"${project.properties["API_KEY"]}\"")
+        println("API_KEY GRADLE = " + project.findProperty("API_KEY"))
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -30,6 +33,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 
 

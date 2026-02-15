@@ -2,6 +2,7 @@ package br.fmu.projetoasthmaspace.Service;
 
 import android.content.Context;
 
+import br.fmu.projetoasthmaspace.BuildConfig;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -15,7 +16,7 @@ public class ApiOpenWeather {
     private static final String BASE_URL =
             "https://api.openweathermap.org/data/2.5/";
 
-    private static final String API_KEY = "756f445ac50f45bd64b41eb0bbe0a3ac";
+    private static final String API_KEY = BuildConfig.API_KEY;
 
     private static Retrofit retrofit;
 
