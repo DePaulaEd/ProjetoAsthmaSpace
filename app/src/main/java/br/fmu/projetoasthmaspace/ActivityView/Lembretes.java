@@ -41,7 +41,7 @@ import br.fmu.projetoasthmaspace.Domain.LembreteReceiver;
 import br.fmu.projetoasthmaspace.Domain.LembreteRequest;
 import br.fmu.projetoasthmaspace.Domain.LembreteResponse;
 import br.fmu.projetoasthmaspace.Domain.LembreteUpdateRequest;
-import br.fmu.projetoasthmaspace.Domain.TokenManager;
+import br.fmu.projetoasthmaspace.Domain.UserSessionManager;
 import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.Service.ApiClient;
 import br.fmu.projetoasthmaspace.Service.ApiService;
@@ -78,7 +78,8 @@ public class Lembretes extends Fragment {
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("APP", Context.MODE_PRIVATE);
         token = prefs.getString("TOKEN", null);
-        api = ApiClient.getApiService(token);
+        api = ApiClient.getApiService(requireContext());
+
         Log.d("LEMBRETES_TOKEN", "Token Carregado: " + token);
         binding.fabNovoLembrete.setOnClickListener(v -> showLembreteDialog(null));
 
@@ -180,44 +181,47 @@ public class Lembretes extends Fragment {
     // No Fragment Lembretes.java:
     private void atualizarLembrete(Lembrete lembrete, String novoTitulo, String novoHorario) {
 
-        String currentToken = TokenManager.getToken(getContext());
+        UserSessionManager session = new UserSessionManager(getContext());
+        String currentToken = session.getToken();
         if (currentToken == null) {
-            Toast.makeText(getContext(), "Erro: Token de acesso inválido.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "Erro: Token inválido.", Toast.LENGTH_LONG).show();
             return;
         }
 
-        ApiService apiAtualizada = ApiClient.getApiService(currentToken);
+        api = ApiClient.getApiService(requireContext());
 
-        // Agora o ID deve ir no corpo da requisição
+
         LembreteUpdateRequest req = new LembreteUpdateRequest(
-                lembrete.getId(),
                 novoTitulo,
                 lembrete.getData(),
                 novoHorario,
                 lembrete.isAtivo()
         );
 
-        Log.d("UPDATE_CHECK", "Enviando PUT para atualizar lembrete: " + lembrete.getId());
+        api.atualizarDados(lembrete.getId(), req)
+                .enqueue(new Callback<Void>() {
 
-        apiAtualizada.atualizarDados(req).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(getContext(), "Lembrete atualizado!", Toast.LENGTH_SHORT).show();
-                    carregarLembretesDoBackend();
-                } else {
-                    Log.e("Retrofit", "Erro ao atualizar lembrete: " + response.code());
-                    Toast.makeText(getContext(), "Erro ao atualizar (" + response.code() + ")", Toast.LENGTH_SHORT).show();
-                }
-            }
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            Toast.makeText(getContext(), "Lembrete atualizado!", Toast.LENGTH_SHORT).show();
+                            carregarLembretesDoBackend();
+                        } else {
+                            Toast.makeText(getContext(),
+                                    "Erro ao atualizar (" + response.code() + ")",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Log.e("Retrofit", "Falha: " + t.getMessage());
-                Toast.makeText(getContext(), "Falha de conexão!", Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(getContext(),
+                                "Falha de conexão!",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
+
 
     private void mostrarDialogoExcluir(Long id) {
         if (id == null) {
@@ -240,17 +244,15 @@ public class Lembretes extends Fragment {
         Context ctx = getContext();
         if (ctx == null) return;
 
-        String token = TokenManager.getToken(ctx);
+        UserSessionManager session = new UserSessionManager(ctx);
+        String token = session.getToken();
         if (token == null) {
             Toast.makeText(ctx, "Erro: Token inválido.", Toast.LENGTH_LONG).show();
             return;
         }
 
-        ApiService api = ApiClient.getApiService(token);
+        api = ApiClient.getApiService(requireContext());
 
-
-        LembreteUpdateRequest body = new LembreteUpdateRequest();
-        body.setId(id);
 
         api.deletarLembrete(id).enqueue(new Callback<Void>() {
             @Override
@@ -261,17 +263,22 @@ public class Lembretes extends Fragment {
                     Toast.makeText(getContext(), "Lembrete excluído!", Toast.LENGTH_SHORT).show();
                     carregarLembretesDoBackend();
                 } else {
-                    Toast.makeText(getContext(), "Erro ao excluir (" + response.code() + ")", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(),
+                            "Erro ao excluir (" + response.code() + ")",
+                            Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 if (!isAdded()) return;
-                Toast.makeText(getContext(), "Falha de conexão!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(),
+                        "Falha de conexão!",
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 
 
 

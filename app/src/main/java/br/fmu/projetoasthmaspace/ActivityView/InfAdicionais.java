@@ -30,6 +30,9 @@ public class InfAdicionais extends AppCompatActivity {
 
     private String senha;
 
+    private ApiService api;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,7 +80,8 @@ public class InfAdicionais extends AppCompatActivity {
                 binding.editTextContatoEmerg.getText().toString()
         );
 
-        ApiService api = ApiClient.getApiService();
+        api = ApiClient.getApiService(getApplicationContext());
+
 
 
         api.cadastrarCliente(dados).enqueue(new Callback<DadosDetalhamentoCliente>() {

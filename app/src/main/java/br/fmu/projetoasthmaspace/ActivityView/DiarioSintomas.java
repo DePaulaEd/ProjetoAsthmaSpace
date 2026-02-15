@@ -60,10 +60,11 @@ public class DiarioSintomas extends Fragment {
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("APP", Context.MODE_PRIVATE);
         token = prefs.getString("TOKEN", null);
-        api = ApiClient.getApiService(token);
+        api = ApiClient.getApiService(requireContext());
+
 
         binding.fabAdicionarSintoma.setOnClickListener(v -> showNovoSintomaDialog());
-//        binding.fabEditarSintoma.setOnClickListener(v -> toggleEditMode());
+        binding.fabEditarSintoma.setOnClickListener(v -> toggleEditMode());
 
         carregarDiario();
     }
@@ -73,7 +74,7 @@ public class DiarioSintomas extends Fragment {
             salvarAlteracoes();
         } else {
             isEditMode = true;
-//            binding.fabEditarSintoma.setImageResource(R.drawable.ic_save);
+            binding.fabEditarSintoma.setImageResource(R.drawable.ic_save);
             binding.fabAdicionarSintoma.setVisibility(View.GONE);
             exibirAnotacoes(binding.containerAnotacoesHoje, hoje, true);
         }
@@ -264,7 +265,7 @@ public class DiarioSintomas extends Fragment {
     }
 
     private void salvarAlteracoes() {
-//        binding.fabEditarSintoma.setEnabled(false);
+        binding.fabEditarSintoma.setEnabled(false);
 
         final List<DiarioResponse> changedItems = new ArrayList<>();
         final List<DiarioRequest> requests = new ArrayList<>();
@@ -325,8 +326,8 @@ public class DiarioSintomas extends Fragment {
         if (!isAdded()) return;
 
         isEditMode = false;
-//        binding.fabEditarSintoma.setEnabled(true);
-//        binding.fabEditarSintoma.setImageResource(R.drawable.ic_edit);
+        binding.fabEditarSintoma.setEnabled(true);
+        binding.fabEditarSintoma.setImageResource(R.drawable.ic_edit);
         binding.fabAdicionarSintoma.setVisibility(View.VISIBLE);
 
         if (errors == null) {

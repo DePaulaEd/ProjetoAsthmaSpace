@@ -29,7 +29,8 @@ public class EnderecoActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         String token = getSharedPreferences("APP", MODE_PRIVATE).getString("TOKEN", null);
-        api = ApiClient.getApiService(token);
+        api = ApiClient.getApiService(getApplicationContext());
+
 
         carregarEnderecoBackend();
 

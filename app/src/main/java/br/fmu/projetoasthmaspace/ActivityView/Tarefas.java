@@ -56,7 +56,11 @@ public class Tarefas extends Fragment {
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("APP", Context.MODE_PRIVATE);
         token = prefs.getString("TOKEN", null);
-        api = ApiClient.getApiService(token);
+        api = ApiClient.getApiService(requireContext());
+
+
+
+
 
         binding.recyclerTarefas.setLayoutManager(new LinearLayoutManager(getContext()));
     }
@@ -196,11 +200,14 @@ public class Tarefas extends Fragment {
 
                     atualizarUI();
 
-                    LembreteUpdateRequest req = new LembreteUpdateRequest(t.id, false);
-                    api.atualizarConclusao(req).enqueue(new Callback<Void>() {
-                        @Override public void onResponse(Call<Void> call, Response<Void> response) { }
-                        @Override public void onFailure(Call<Void> call, Throwable t) { }
-                    });
+                    LembreteUpdateRequest req = new LembreteUpdateRequest(false);
+
+                    api.atualizarDados(t.id, req)
+                            .enqueue(new Callback<Void>() {
+                                @Override public void onResponse(Call<Void> call, Response<Void> response) { }
+                                @Override public void onFailure(Call<Void> call, Throwable t) { }
+                            });
+
                 }
             });
 
@@ -219,12 +226,13 @@ public class Tarefas extends Fragment {
 
         atualizarUI();
 
-        LembreteUpdateRequest req = new LembreteUpdateRequest(tarefa.id, true);
+        LembreteUpdateRequest req = new LembreteUpdateRequest(true);
 
-        api.atualizarConclusao(req).enqueue(new Callback<Void>() {
-            @Override public void onResponse(Call<Void> call, Response<Void> response) { }
-            @Override public void onFailure(Call<Void> call, Throwable t) { }
-        });
+        api.atualizarDados(tarefa.id, req)
+                .enqueue(new Callback<Void>() {
+                    @Override public void onResponse(Call<Void> call, Response<Void> response) { }
+                    @Override public void onFailure(Call<Void> call, Throwable t) { }
+                });
     }
 
     @Override

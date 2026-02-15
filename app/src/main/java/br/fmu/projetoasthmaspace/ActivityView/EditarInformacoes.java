@@ -75,7 +75,8 @@ public class EditarInformacoes extends AppCompatActivity {
 
     private void inicializarApi() {
         String token = getSharedPreferences("APP", MODE_PRIVATE).getString("TOKEN", null);
-        api = ApiClient.getApiService(token);
+        api = ApiClient.getApiService(getApplicationContext());
+
     }
 
 

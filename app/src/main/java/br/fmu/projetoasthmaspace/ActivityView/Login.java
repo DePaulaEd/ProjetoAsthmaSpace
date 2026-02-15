@@ -22,6 +22,7 @@ import androidx.core.view.WindowInsetsCompat;
 import br.fmu.projetoasthmaspace.Domain.LoginRequest;
 import br.fmu.projetoasthmaspace.Domain.SharedPreferencesKeys;
 import br.fmu.projetoasthmaspace.Domain.TokenResponse;
+import br.fmu.projetoasthmaspace.Domain.UserSessionManager;
 import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.Service.ApiClient;
 import br.fmu.projetoasthmaspace.Service.ApiService;
@@ -33,6 +34,7 @@ import retrofit2.Response;
 public class Login extends AppCompatActivity {
 
     private ActivityLoginBinding binding;
+    private ApiService api;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +89,8 @@ public class Login extends AppCompatActivity {
 
         LoginRequest req = new LoginRequest(email, senha);
 
-        ApiService api = ApiClient.getApiService();
+        api = ApiClient.getApiService(getApplicationContext());
+
 
         api.login(req).enqueue(new Callback<TokenResponse>() {
             @Override
@@ -98,9 +101,14 @@ public class Login extends AppCompatActivity {
                     Log.d("AUTH_TOKEN", "Token Recebido e Salvo: " + token);
 
 
-                    SharedPreferences prefs = getSharedPreferences(SharedPreferencesKeys.PREFS_FILE_NAME, MODE_PRIVATE);
-                    prefs.edit().putString(SharedPreferencesKeys.TOKEN_KEY, token).apply();
-                    Log.d("AUTH_TOKEN", "Token Salvo: " + token);
+                    UserSessionManager session = new UserSessionManager(Login.this);
+                    session.saveToken(token);
+
+
+
+//                    SharedPreferences prefs = getSharedPreferences(SharedPreferencesKeys.PREFS_FILE_NAME, MODE_PRIVATE);
+//                    prefs.edit().putString(SharedPreferencesKeys.TOKEN_KEY, token).apply();
+//                    Log.d("AUTH_TOKEN", "Token Salvo: " + token);
 
 
 
