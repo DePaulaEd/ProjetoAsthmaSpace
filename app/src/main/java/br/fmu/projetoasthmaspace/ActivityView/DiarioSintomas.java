@@ -1,21 +1,32 @@
 package br.fmu.projetoasthmaspace.ActivityView;
 
+import android.app.DownloadManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -34,6 +45,7 @@ import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.Service.ApiClient;
 import br.fmu.projetoasthmaspace.Service.ApiService;
 import br.fmu.projetoasthmaspace.databinding.ActivityDiarioSintomasBinding;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -46,6 +58,12 @@ public class DiarioSintomas extends Fragment {
     private String token;
     private ApiService api;
     private boolean isEditMode = false;
+
+    // Novos componentes
+    private Spinner spinnerPeriodo;
+    private Button btnBaixarPdf;
+    private int periodoSelecionado = 1; // Padrão: último mês
+    private boolean isDownloadingPdf = false;
 
     @Nullable
     @Override
@@ -62,11 +80,236 @@ public class DiarioSintomas extends Fragment {
         token = prefs.getString("TOKEN", null);
         api = ApiClient.getApiService(requireContext());
 
+        // Inicializar novos componentes
+        inicializarControles();
 
         binding.fabAdicionarSintoma.setOnClickListener(v -> showNovoSintomaDialog());
         binding.fabEditarSintoma.setOnClickListener(v -> toggleEditMode());
 
         carregarDiario();
+    }
+
+    /**
+     * Inicializa o Spinner de período e o botão de PDF
+     */
+    private void inicializarControles() {
+        spinnerPeriodo = binding.getRoot().findViewById(R.id.spinner_periodo);
+        btnBaixarPdf = binding.getRoot().findViewById(R.id.btn_baixar_pdf);
+
+        configurarSpinnerPeriodo();
+        configurarBotaoPdf();
+    }
+
+    /**
+     * Configura o Spinner com opções de período
+     */
+    private void configurarSpinnerPeriodo() {
+        // Opções de período
+        String[] periodos = {
+                "Último mês",
+                "Últimos 2 meses",
+                "Últimos 3 meses",
+                "Últimos 6 meses",
+                "Últimos 9 meses",
+                "Último ano"
+        };
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                requireContext(),
+                R.layout.spinner_item,
+                periodos
+        ) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView textView = (TextView) view;
+                textView.setTextColor(getResources().getColor(R.color.white, null));
+                return view;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+                TextView textView = (TextView) view;
+                textView.setTextColor(getResources().getColor(R.color.white, null));
+                textView.setPadding(32, 24, 32, 24);
+                return view;
+            }
+        };
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPeriodo.setAdapter(adapter);
+
+        // Listener para mudança de período
+        spinnerPeriodo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Converter posição para número de meses
+                switch (position) {
+                    case 0: periodoSelecionado = 1; break;
+                    case 1: periodoSelecionado = 2; break;
+                    case 2: periodoSelecionado = 3; break;
+                    case 3: periodoSelecionado = 6; break;
+                    case 4: periodoSelecionado = 9; break;
+                    case 5: periodoSelecionado = 12; break;
+                }
+                filtrarDiarioPorPeriodo();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Não fazer nada
+            }
+        });
+    }
+
+    /**
+     * Configura o botão de download de PDF
+     */
+    private void configurarBotaoPdf() {
+        btnBaixarPdf.setOnClickListener(v -> {
+            if (!isDownloadingPdf) {
+                baixarPdfDaApi();
+            }
+        });
+    }
+
+    /**
+     * Filtra o diário com base no período selecionado
+     */
+    private void filtrarDiarioPorPeriodo() {
+        if (diario == null) return;
+
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo"));
+        calendar.add(Calendar.MONTH, -periodoSelecionado);
+        Date dataLimite = calendar.getTime();
+
+        List<DiarioResponse> diarioFiltrado = new ArrayList<>();
+        for (DiarioResponse d : diario) {
+            Date dataAnotacao = DiarioParser.parseData(d.getData());
+            if (dataAnotacao != null && dataAnotacao.after(dataLimite)) {
+                diarioFiltrado.add(d);
+            }
+        }
+
+        // Atualizar a exibição com dados filtrados
+        atualizarTelaComDados(diarioFiltrado);
+
+        String mensagem = String.format("Exibindo últimos %d %s",
+                periodoSelecionado,
+                periodoSelecionado == 1 ? "mês" : "meses");
+        Toast.makeText(getContext(), mensagem, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Faz o download do PDF da API
+     */
+    private void baixarPdfDaApi() {
+        isDownloadingPdf = true;
+        btnBaixarPdf.setEnabled(false);
+        btnBaixarPdf.setText("Baixando...");
+
+        // Chamar API para baixar PDF
+        // Adapte o endpoint conforme sua API
+        api.gerarPdfDiario(periodoSelecionado).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (!isAdded()) return;
+
+                if (response.isSuccessful() && response.body() != null) {
+                    salvarPdf(response.body());
+                } else {
+                    mostrarErro("Erro ao baixar PDF: " + response.code());
+                    restaurarBotaoPdf();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                if (!isAdded()) return;
+                mostrarErro("Falha na conexão: " + t.getMessage());
+                restaurarBotaoPdf();
+            }
+        });
+    }
+
+    /**
+     * Salva o PDF no dispositivo
+     */
+    private void salvarPdf(ResponseBody body) {
+        try {
+            // Nome do arquivo
+            String nomeArquivo = String.format("diario_sintomas_%dmeses_%d.pdf",
+                    periodoSelecionado,
+                    System.currentTimeMillis());
+
+            // Diretório de download
+            File diretorioDownload = requireContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+            File arquivo = new File(diretorioDownload, nomeArquivo);
+
+            // Salvar arquivo
+            FileOutputStream outputStream = new FileOutputStream(arquivo);
+            outputStream.write(body.bytes());
+            outputStream.close();
+
+            // Mostrar mensagem de sucesso
+            Toast.makeText(getContext(), "PDF salvo em Downloads", Toast.LENGTH_LONG).show();
+
+            // Abrir PDF automaticamente
+            abrirPdf(arquivo);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarErro("Erro ao salvar PDF: " + e.getMessage());
+        } finally {
+            restaurarBotaoPdf();
+        }
+    }
+
+    /**
+     * Abre o PDF após o download
+     */
+    private void abrirPdf(File arquivo) {
+        try {
+            Uri uri = FileProvider.getUriForFile(
+                    requireContext(),
+                    requireContext().getPackageName() + ".fileprovider",
+                    arquivo
+            );
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uri, "application/pdf");
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
+                startActivity(intent);
+            } else {
+                Toast.makeText(getContext(),
+                        "Nenhum aplicativo disponível para abrir PDF",
+                        Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarErro("Erro ao abrir PDF: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Restaura o estado original do botão de PDF
+     */
+    private void restaurarBotaoPdf() {
+        if (!isAdded()) return;
+        isDownloadingPdf = false;
+        btnBaixarPdf.setEnabled(true);
+        btnBaixarPdf.setText("PDF");
+    }
+
+    /**
+     * Mostra mensagem de erro
+     */
+    private void mostrarErro(String mensagem) {
+        if (!isAdded()) return;
+        Toast.makeText(getContext(), mensagem, Toast.LENGTH_LONG).show();
     }
 
     private void toggleEditMode() {
@@ -87,7 +330,7 @@ public class DiarioSintomas extends Fragment {
                 if (!isAdded()) return;
                 if (response.isSuccessful()) {
                     diario = response.body();
-                    atualizarTela();
+                    filtrarDiarioPorPeriodo(); // Aplicar filtro após carregar
                 } else {
                     Toast.makeText(getContext(), "Erro ao carregar diário", Toast.LENGTH_SHORT).show();
                 }
@@ -102,7 +345,14 @@ public class DiarioSintomas extends Fragment {
     }
 
     private void atualizarTela() {
-        if (diario == null || binding == null) return;
+        atualizarTelaComDados(diario);
+    }
+
+    /**
+     * Atualiza a tela com uma lista específica de dados
+     */
+    private void atualizarTelaComDados(List<DiarioResponse> dados) {
+        if (dados == null || binding == null) return;
 
         SimpleDateFormat dfHoje = new SimpleDateFormat("dd 'de' MMMM", Locale.getDefault());
         dfHoje.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
@@ -110,10 +360,10 @@ public class DiarioSintomas extends Fragment {
         Date agora = Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo")).getTime();
         binding.textDataAtual.setText(dfHoje.format(agora));
 
-
         hoje = new ArrayList<>();
         Map<String, List<DiarioResponse>> anteriores = new HashMap<>();
-        for (DiarioResponse d : diario) {
+
+        for (DiarioResponse d : dados) {
             if (DiarioParser.isToday(d.getData())) {
                 hoje.add(d);
             } else {
@@ -243,7 +493,6 @@ public class DiarioSintomas extends Fragment {
         String data = dfData.format(agora);
         String horario = dfHora.format(agora);
 
-
         DiarioRequest req = new DiarioRequest(data, horario, intensidade, descricao);
 
         api.registrarSintoma(req).enqueue(new Callback<Void>() {
@@ -368,7 +617,6 @@ public class DiarioSintomas extends Fragment {
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
-
 
     @Override
     public void onDestroyView() {

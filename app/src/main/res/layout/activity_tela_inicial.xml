@@ -100,9 +100,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:text="Aproveite para se exercitar ao ar livre!"
-                        android:textColor="#D0FFFFFF"
                         android:textAlignment="center"
-                        android:textSize="16sp"/>
+                        android:textColor="#D0FFFFFF"
+                        android:textSize="16sp" />
 
                 </LinearLayout>
 

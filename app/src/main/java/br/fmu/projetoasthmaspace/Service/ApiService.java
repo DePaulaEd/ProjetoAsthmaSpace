@@ -16,10 +16,12 @@ import br.fmu.projetoasthmaspace.Domain.LembreteUpdateRequest;
 import br.fmu.projetoasthmaspace.Domain.LoginRequest;
 import br.fmu.projetoasthmaspace.Domain.TokenResponse;
 import br.fmu.projetoasthmaspace.Domain.UsuarioResponse;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
@@ -42,6 +44,10 @@ public interface ApiService {
 
     @GET("clientes/me")
     Call<DadosDetalhamentoCliente> getMeuPerfil();
+    @GET("clientes/me")
+    Call<DadosDetalhamentoCliente> getMeuPerfil(
+            @Header("Authorization") String token
+    );
 
     @GET("/usuarios/me")
     Call<UsuarioResponse> getUsuarioLogado();
@@ -59,6 +65,14 @@ public interface ApiService {
 
     @DELETE("diario/delete/{id}")
     Call<Void> deletarDiario(@Path("id") Long id);
+
+    // -------- RELATÓRIO DE SINTOMAS  PDF --------
+    @GET("relatorios/diario/{meses}")
+    Call<ResponseBody> gerarPdfDiario(
+            @Path("meses") int meses
+    );
+
+
 
 
 

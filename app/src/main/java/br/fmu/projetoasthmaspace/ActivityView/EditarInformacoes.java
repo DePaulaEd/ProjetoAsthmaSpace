@@ -31,9 +31,10 @@ public class EditarInformacoes extends AppCompatActivity {
     private EditText edtLogradouro, edtNumero, edtComplemento, edtBairro, edtCidade, edtUF, edtCEP;
 
     private TextView txtEmail, txtCPF;
-    private Button btnSalvar;
+    private Button btnSalvar, btnVoltar;
 
     private ApiService api;
+    private Long clienteId;
     private static final String TAG = "EDITAR_INFO";
 
     @Override
@@ -45,40 +46,40 @@ public class EditarInformacoes extends AppCompatActivity {
 
         inicializarViews();
         inicializarApi();
-
         carregarPerfil();
+
         btnSalvar.setOnClickListener(v -> salvarDados());
+
+        // Botão voltar fecha a activity
+        btnVoltar.setOnClickListener(v -> finish());
     }
 
-
     private void inicializarViews() {
-        edtNome = findViewById(R.id.edtNome);
-        edtTelefone = findViewById(R.id.edtTelefone);
-        edtSexo = findViewById(R.id.edtSexo);
-        edtIdade = findViewById(R.id.edtIdade);
+        edtNome        = findViewById(R.id.edtNome);
+        edtTelefone    = findViewById(R.id.edtTelefone);
+        edtSexo        = findViewById(R.id.edtSexo);
+        edtIdade       = findViewById(R.id.edtIdade);
         edtMedicamentos = findViewById(R.id.edtMedicamentos);
-        edtEmergencia = findViewById(R.id.edtEmergencia);
+        edtEmergencia  = findViewById(R.id.edtEmergencia);
 
-        edtLogradouro = findViewById(R.id.edtLogradouro);
-        edtNumero = findViewById(R.id.edtNumero);
+        edtLogradouro  = findViewById(R.id.edtLogradouro);
+        edtNumero      = findViewById(R.id.edtNumero);
         edtComplemento = findViewById(R.id.edtComplemento);
-        edtBairro = findViewById(R.id.edtBairro);
-        edtCidade = findViewById(R.id.edtCidade);
-        edtUF = findViewById(R.id.edtUF);
-        edtCEP = findViewById(R.id.edtCEP);
+        edtBairro      = findViewById(R.id.edtBairro);
+        edtCidade      = findViewById(R.id.edtCidade);
+        edtUF          = findViewById(R.id.edtUF);
+        edtCEP         = findViewById(R.id.edtCEP);
 
         txtEmail = findViewById(R.id.txtEmail);
-        txtCPF = findViewById(R.id.txtCPF);
+        txtCPF   = findViewById(R.id.txtCPF);
 
-//        btnSalvar = findViewById(R.id.btnSalvar);
+        btnSalvar = findViewById(R.id.btnSalvar);
+        btnVoltar = findViewById(R.id.btnVoltar);
     }
 
     private void inicializarApi() {
-        String token = getSharedPreferences("APP", MODE_PRIVATE).getString("TOKEN", null);
         api = ApiClient.getApiService(getApplicationContext());
-
     }
-
 
     private void carregarPerfil() {
         api.getMeuPerfil().enqueue(new Callback<DadosDetalhamentoCliente>() {
@@ -108,12 +109,13 @@ public class EditarInformacoes extends AppCompatActivity {
     }
 
     private void atualizarCampos(DadosDetalhamentoCliente d) {
-
+        clienteId = d.getId();
+        Log.d(TAG, "clienteId salvo: " + clienteId);
+        clienteId = d.getId();
         edtNome.setText(safe(d.getNome()));
         edtTelefone.setText(safe(d.getTelefone()));
         edtSexo.setText(safe(d.getSexo()));
         edtIdade.setText(String.valueOf(d.getIdade()));
-
         edtMedicamentos.setText(safe(d.getMedicamentos()));
         edtEmergencia.setText(safe(d.getContatoEmergencia()));
 
@@ -129,27 +131,35 @@ public class EditarInformacoes extends AppCompatActivity {
             edtUF.setText(safe(d.getEndereco().getUf()));
             edtCEP.setText(safe(d.getEndereco().getCep()));
         }
-
-        txtEmail.setEnabled(false);
-        txtCPF.setEnabled(false);
     }
 
     private String safe(String s) {
         return s == null ? "" : s;
     }
-    private void salvarDados() {
 
+    private void salvarDados() {
         Log.d(TAG, "Botão salvar clicado.");
 
+        // Validação básica
+        if (edtNome.getText().toString().trim().isEmpty()) {
+            edtNome.setError("Nome obrigatório");
+            edtNome.requestFocus();
+            return;
+        }
+
+        // Desabilitar botão para evitar duplo clique
+        btnSalvar.setEnabled(false);
+        btnSalvar.setText("Salvando...");
+
         AtualizarRequest req = new AtualizarRequest();
-        req.nome = edtNome.getText().toString().trim();
+        req.nome     = edtNome.getText().toString().trim();
         req.telefone = edtTelefone.getText().toString().trim();
-        req.sexo = edtSexo.getText().toString().trim();
+        req.sexo     = edtSexo.getText().toString().trim();
 
         String idadeStr = edtIdade.getText().toString().trim();
         req.idade = idadeStr.isEmpty() ? null : Integer.parseInt(idadeStr);
 
-        req.medicamentos = edtMedicamentos.getText().toString().trim();
+        req.medicamentos      = edtMedicamentos.getText().toString().trim();
         req.contatoEmergencia = edtEmergencia.getText().toString().trim();
 
         Endereco end = new Endereco();
@@ -160,25 +170,35 @@ public class EditarInformacoes extends AppCompatActivity {
         end.setCidade(edtCidade.getText().toString().trim());
         end.setUf(edtUF.getText().toString().trim());
         end.setCep(edtCEP.getText().toString().trim());
-
         req.endereco = end;
 
         api.atualizarPerfil(req).enqueue(new Callback<DadosDetalhamentoCliente>() {
             @Override
-            public void onResponse(Call<DadosDetalhamentoCliente> call, Response<DadosDetalhamentoCliente> response) {
+            public void onResponse(Call<DadosDetalhamentoCliente> call,
+                                   Response<DadosDetalhamentoCliente> response) {
+
+                // Reabilitar botão
+                btnSalvar.setEnabled(true);
+                btnSalvar.setText("Salvar Alterações");
+
                 if (!response.isSuccessful() || response.body() == null) {
-                    Toast.makeText(EditarInformacoes.this, "Erro ao atualizar perfil", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditarInformacoes.this,
+                            "Erro ao atualizar perfil", Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "Erro backend: " + response.code());
                     return;
                 }
 
-                Toast.makeText(EditarInformacoes.this, "Perfil atualizado!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditarInformacoes.this,
+                        "✓ Perfil atualizado com sucesso!", Toast.LENGTH_SHORT).show();
                 atualizarCampos(response.body());
             }
 
             @Override
             public void onFailure(Call<DadosDetalhamentoCliente> call, Throwable t) {
-                Toast.makeText(EditarInformacoes.this, "Falha: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                btnSalvar.setEnabled(true);
+                btnSalvar.setText("Salvar Alterações");
+                Toast.makeText(EditarInformacoes.this,
+                        "Falha: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e(TAG, t.getMessage());
             }
         });

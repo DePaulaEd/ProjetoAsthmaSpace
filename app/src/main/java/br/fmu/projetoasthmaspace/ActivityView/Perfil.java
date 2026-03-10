@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import br.fmu.projetoasthmaspace.Domain.UserSessionManager;
+import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.databinding.ActivityPerfilBinding;
 
 public class Perfil extends Fragment {
@@ -60,6 +62,28 @@ public class Perfil extends Fragment {
             startActivity(intent);
         });
 
+        binding.btnAjuda.setOnClickListener(v -> {
+            Intent intent = new Intent(requireActivity(), AjudaActivity.class);
+            startActivity(intent);
+        });
+
+        binding.btnDiarioSintomas.setOnClickListener(v -> {
+            // Navega pelo frameLayout da MainActivity mantendo toolbar e bottom nav
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.frameLayout, new DiarioSintomas())
+                    .addToBackStack(null)
+                    .commit();
+
+            // Marca o item correto no bottom nav
+            ((MainActivity) requireActivity()).binding.bottomNavigationView
+                    .setSelectedItemId(R.id.navigation_diario);
+        });
+//
+//        // No seu menu/drawer onde está o item Ajuda:
+//        Intent intent = new Intent(this, AjudaActivity.class);
+//        startActivity(intent);
+
         // botao de sair do app
         binding.btnSair.setOnClickListener(v -> {
             new AlertDialog.Builder(getContext())
@@ -85,12 +109,33 @@ public class Perfil extends Fragment {
     }
 
     private void carregarDadosDoPerfil() {
-        // Carrega o nome do usuário salvo
-        SharedPreferences prefs = requireActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        String nomeCompleto = prefs.getString("user_name", null);
+
+        UserSessionManager session = new UserSessionManager(requireContext());
+        String nomeCompleto = session.getNome();
+        String token = session.getToken();
 
         if (nomeCompleto != null && !nomeCompleto.trim().isEmpty()) {
+
             binding.textName.setText(nomeCompleto);
+
+        } else if (token != null) {
+
+            UserServiceHelper.buscarNomeUsuario(
+                    requireContext(),
+                    token,
+                    new UserServiceHelper.NomeCallback() {
+
+                        @Override
+                        public void onSuccess(String nome) {
+                            binding.textName.setText(nome);
+                        }
+
+                        @Override
+                        public void onError(String erro) {
+                            Log.e("PERFIL", erro);
+                        }
+                    });
+
         }
     }
 

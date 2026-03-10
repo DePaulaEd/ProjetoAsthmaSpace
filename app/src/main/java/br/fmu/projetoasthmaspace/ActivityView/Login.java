@@ -1,19 +1,12 @@
 package br.fmu.projetoasthmaspace.ActivityView;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
-import android.text.style.UnderlineSpan;
-import android.util.Log;
-import android.view.View;
+
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -47,28 +40,11 @@ public class Login extends AppCompatActivity {
         binding.btnEntrar.setOnClickListener(v -> fazerLogin());
 
         // Link "Cadastre-se!"
-        String textoCompleto = getString(R.string.nao_tem_conta_cadastre_se);
-        SpannableString spannableString = new SpannableString(textoCompleto);
-
-        ClickableSpan clickableSpan = new ClickableSpan() {
-            @Override
-            public void onClick(@NonNull View widget) {
-                Intent intent = new Intent(Login.this, Cadastrar.class);
-                startActivity(intent);
-            }
-        };
-
-        String textoLink = "Cadastre-se!";
-        int inicioDoLink = textoCompleto.indexOf(textoLink);
-        int fimDoLink = inicioDoLink + textoLink.length();
-
-        if (inicioDoLink != -1) {
-            spannableString.setSpan(clickableSpan, inicioDoLink, fimDoLink, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            spannableString.setSpan(new UnderlineSpan(), inicioDoLink, fimDoLink, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-
-        binding.textCadastre.setText(spannableString);
-        binding.textCadastre.setMovementMethod(LinkMovementMethod.getInstance());
+        // ADICIONE isso no lugar:
+        binding.btnCadastrar.setOnClickListener(v -> {
+            Intent intent = new Intent(Login.this, Cadastrar.class);
+            startActivity(intent);
+        });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -98,18 +74,9 @@ public class Login extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
 
                     String token = response.body().token;
-                    Log.d("AUTH_TOKEN", "Token Recebido e Salvo: " + token);
-
 
                     UserSessionManager session = new UserSessionManager(Login.this);
                     session.saveToken(token);
-
-
-
-//                    SharedPreferences prefs = getSharedPreferences(SharedPreferencesKeys.PREFS_FILE_NAME, MODE_PRIVATE);
-//                    prefs.edit().putString(SharedPreferencesKeys.TOKEN_KEY, token).apply();
-//                    Log.d("AUTH_TOKEN", "Token Salvo: " + token);
-
 
 
                     Toast.makeText(Login.this, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show();
@@ -129,4 +96,5 @@ public class Login extends AppCompatActivity {
             }
         });
     }
+
 }

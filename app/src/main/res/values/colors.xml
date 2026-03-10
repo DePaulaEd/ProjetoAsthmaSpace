@@ -9,6 +9,7 @@
     <color name="blue_opaque">#FF47547E</color>
     <color name="gray_bluish">#FF4B5578</color>
     <color name="turquoise_light">#FFA8D4D4</color>
+    <color name="green_success">#4CAF50</color>
 
     <!-- Cores para o painel de resumo -->
     <color name="blue_dark">#0A84FF</color>

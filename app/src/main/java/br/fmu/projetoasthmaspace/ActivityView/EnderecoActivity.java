@@ -22,6 +22,8 @@ public class EnderecoActivity extends AppCompatActivity {
     private ApiService api;
     private Endereco enderecoAtual;
 
+    private Long clienteId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,14 +37,16 @@ public class EnderecoActivity extends AppCompatActivity {
         carregarEnderecoBackend();
 
         binding.btnVoltar.setOnClickListener(v -> finish());
-//        binding.btnSalvar.setOnClickListener(v -> salvarEndereco());
+//        binding.btnSalvar.setOnClickListener(v -> salvarEndereco()); // ← descomentar
     }
 
     private void carregarEnderecoBackend() {
+
         api.getMeuPerfil().enqueue(new Callback<DadosDetalhamentoCliente>() {
             @Override
             public void onResponse(Call<DadosDetalhamentoCliente> call, Response<DadosDetalhamentoCliente> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    clienteId = response.body().getId();
                     enderecoAtual = response.body().getEndereco();
                     atualizarUI(enderecoAtual);
                 } else {
@@ -103,6 +107,7 @@ public class EnderecoActivity extends AppCompatActivity {
     private String safe(String s) {
         return (s == null || s.trim().isEmpty()) ? "" : s;
     }
+
 
     @Override
     protected void onDestroy() {

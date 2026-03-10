@@ -54,4 +54,6 @@ public class DadosDetalhamentoCliente {
 
     public String getContatoEmergencia() { return contatoEmergencia; }
     public void setContatoEmergencia(String contatoEmergencia) { this.contatoEmergencia = contatoEmergencia; }
+
+
 }

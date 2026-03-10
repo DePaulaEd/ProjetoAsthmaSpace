@@ -1,6 +1,7 @@
 package br.fmu.projetoasthmaspace.ActivityView;
 
 import android.app.AlarmManager;
+import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -59,10 +60,13 @@ public class Lembretes extends Fragment {
     private String token;
     private ApiService api;
     private final SimpleDateFormat parseDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-    private final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd 'de' MMMM 'de' yyyy", Locale.getDefault());
+    private final SimpleDateFormat displayDateFormat = new SimpleDateFormat("dd 'de' MMMM 'de' yyyy", new Locale("pt", "BR"));
 
+    // =============================================
+    // FILTRO ATIVO: null = todos, "hoje", "programados", "concluidos"
+    // =============================================
+    private String filtroAtivo = null;
 
-    // Lista local de lembretes, agora tipada corretamente com a classe Domain.Lembrete
     private final List<Lembrete> listaDeLembretes = new ArrayList<>();
 
     @Nullable
@@ -80,17 +84,64 @@ public class Lembretes extends Fragment {
         token = prefs.getString("TOKEN", null);
         api = ApiClient.getApiService(requireContext());
 
-        Log.d("LEMBRETES_TOKEN", "Token Carregado: " + token);
         binding.fabNovoLembrete.setOnClickListener(v -> showLembreteDialog(null));
 
-        binding.fabEditarLembrete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isEditMode = !isEditMode;
-                toggleUiForEditMode();
-                atualizarListaDeLembretes();
-            }
+        binding.fabEditarLembrete.setOnClickListener(v -> {
+            isEditMode = !isEditMode;
+            toggleUiForEditMode();
+            atualizarListaDeLembretes();
         });
+
+        // =============================================
+        // FILTROS: clique nos cards de resumo
+        // =============================================
+        binding.statHoje.getRoot().setOnClickListener(v -> toggleFiltro("hoje"));
+        binding.statProgramados.getRoot().setOnClickListener(v -> toggleFiltro("programados"));
+        binding.statConcluidos.getRoot().setOnClickListener(v -> toggleFiltro("concluidos"));
+        binding.statTodos.getRoot().setOnClickListener(v -> toggleFiltro(null));
+    }
+
+    // Alterna filtro: se clicar no mesmo, desativa
+    private void toggleFiltro(String filtro) {
+        if (filtro == null || filtro.equals(filtroAtivo)) {
+            filtroAtivo = null;
+        } else {
+            filtroAtivo = filtro;
+        }
+        destacarCardFiltro();
+        atualizarListaDeLembretes();
+    }
+
+    // Destaca visualmente o card de filtro ativo
+    private void destacarCardFiltro() {
+        float alphaAtivo = 1.0f;
+        float alphaInativo = 0.5f;
+
+        binding.statHoje.getRoot().setAlpha("hoje".equals(filtroAtivo) ? alphaAtivo : (filtroAtivo == null ? alphaAtivo : alphaInativo));
+        binding.statProgramados.getRoot().setAlpha("programados".equals(filtroAtivo) ? alphaAtivo : (filtroAtivo == null ? alphaAtivo : alphaInativo));
+        binding.statConcluidos.getRoot().setAlpha("concluidos".equals(filtroAtivo) ? alphaAtivo : (filtroAtivo == null ? alphaAtivo : alphaInativo));
+        binding.statTodos.getRoot().setAlpha(filtroAtivo == null ? alphaAtivo : alphaInativo);
+    }
+
+    // Retorna lista filtrada conforme filtroAtivo
+    private List<Lembrete> getListaFiltrada() {
+        if (filtroAtivo == null) return new ArrayList<>(listaDeLembretes);
+
+        List<Lembrete> filtrada = new ArrayList<>();
+        for (Lembrete l : listaDeLembretes) {
+            switch (filtroAtivo) {
+                case "hoje":
+                    if (isToday(l.getData())) filtrada.add(l);
+                    break;
+                case "programados":
+                    if (!l.isAtivo()) filtrada.add(l);
+                    break;
+                case "concluidos":
+                    if (l.isAtivo()) filtrada.add(l);
+                    break;
+            }
+        }
+        return filtrada;
     }
 
     @Override
@@ -109,13 +160,12 @@ public class Lembretes extends Fragment {
         }
     }
 
-    // --- Funções de Backend ---
+    // --- Backend ---
 
     private void carregarLembretesDoBackend() {
         api.listarLembretes().enqueue(new Callback<List<LembreteResponse>>() {
             @Override
             public void onResponse(Call<List<LembreteResponse>> call, Response<List<LembreteResponse>> response) {
-
                 if (response.isSuccessful() && response.body() != null) {
                     new Thread(() -> {
                         List<Lembrete> tempLista = new ArrayList<>();
@@ -125,19 +175,17 @@ public class Lembretes extends Fragment {
                                 if (dataStr == null || dataStr.isEmpty()) {
                                     dataStr = parseDateFormat.format(new Date());
                                 }
-                                Date dataParsed = parseDateFormat.parse(dataStr);
-
-                                Lembrete l = new Lembrete(
+                                parseDateFormat.parse(dataStr); // valida
+                                tempLista.add(new Lembrete(
                                         resp.getId(),
                                         resp.getTitulo(),
-                                        "", // Descrição não usada
+                                        "",
                                         dataStr,
                                         resp.getHorario(),
                                         resp.isConcluido()
-                                );
-                                tempLista.add(l);
+                                ));
                             } catch (ParseException e) {
-                                Log.e("Lembretes", "Erro ao parsear data do lembrete id: " + resp.getId(), e);
+                                Log.e("Lembretes", "Erro ao parsear data id: " + resp.getId(), e);
                             }
                         }
                         requireActivity().runOnUiThread(() -> {
@@ -151,6 +199,7 @@ public class Lembretes extends Fragment {
                     Toast.makeText(getContext(), "Erro ao buscar lembretes", Toast.LENGTH_SHORT).show();
                 }
             }
+
             @Override
             public void onFailure(Call<List<LembreteResponse>> call, Throwable t) {
                 Toast.makeText(getContext(), "Falha na conexão", Toast.LENGTH_SHORT).show();
@@ -178,179 +227,194 @@ public class Lembretes extends Fragment {
         });
     }
 
-    // No Fragment Lembretes.java:
-    private void atualizarLembrete(Lembrete lembrete, String novoTitulo, String novoHorario) {
-
-        UserSessionManager session = new UserSessionManager(getContext());
-        String currentToken = session.getToken();
-        if (currentToken == null) {
-            Toast.makeText(getContext(), "Erro: Token inválido.", Toast.LENGTH_LONG).show();
-            return;
-        }
-
+    private void atualizarLembrete(Lembrete lembrete, String novoTitulo, String novoHorario, String novaData) {
         api = ApiClient.getApiService(requireContext());
-
 
         LembreteUpdateRequest req = new LembreteUpdateRequest(
                 novoTitulo,
-                lembrete.getData(),
+                novaData,  // ← agora usa a data selecionada no DatePicker
                 novoHorario,
                 lembrete.isAtivo()
         );
 
-        api.atualizarDados(lembrete.getId(), req)
-                .enqueue(new Callback<Void>() {
+        api.atualizarDados(lembrete.getId(), req).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(getContext(), "Lembrete atualizado!", Toast.LENGTH_SHORT).show();
+                    carregarLembretesDoBackend();
+                } else {
+                    Toast.makeText(getContext(), "Erro ao atualizar (" + response.code() + ")", Toast.LENGTH_SHORT).show();
+                }
+            }
 
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful()) {
-                            Toast.makeText(getContext(), "Lembrete atualizado!", Toast.LENGTH_SHORT).show();
-                            carregarLembretesDoBackend();
-                        } else {
-                            Toast.makeText(getContext(),
-                                    "Erro ao atualizar (" + response.code() + ")",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        Toast.makeText(getContext(),
-                                "Falha de conexão!",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-
-    private void mostrarDialogoExcluir(Long id) {
-        if (id == null) {
-            Log.e("DELETE", "ID DO LEMBRETE É NULO!");
-            return;
-        }
-
-        Context ctx = getContext();
-        if (ctx == null) return;
-
-        new AlertDialog.Builder(ctx)
-                .setTitle("Excluir Lembrete")
-                .setMessage("Tem certeza que deseja excluir este lembrete?")
-                .setPositiveButton("Excluir", (dialog, which) -> deletarLembrete(id))
-                .setNegativeButton("Cancelar", null)
-                .show();
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(getContext(), "Falha de conexão!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void deletarLembrete(Long id) {
         Context ctx = getContext();
         if (ctx == null) return;
 
-        UserSessionManager session = new UserSessionManager(ctx);
-        String token = session.getToken();
-        if (token == null) {
-            Toast.makeText(ctx, "Erro: Token inválido.", Toast.LENGTH_LONG).show();
-            return;
-        }
-
         api = ApiClient.getApiService(requireContext());
-
 
         api.deletarLembrete(id).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (!isAdded()) return;
-
                 if (response.isSuccessful()) {
                     Toast.makeText(getContext(), "Lembrete excluído!", Toast.LENGTH_SHORT).show();
                     carregarLembretesDoBackend();
                 } else {
-                    Toast.makeText(getContext(),
-                            "Erro ao excluir (" + response.code() + ")",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Erro ao excluir (" + response.code() + ")", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 if (!isAdded()) return;
-                Toast.makeText(getContext(),
-                        "Falha de conexão!",
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Falha de conexão!", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-
-
-
-
-
-
-
-
+    // =============================================
+    // DIALOG MELHORADO com DatePicker
+    // =============================================
     private void showLembreteDialog(@Nullable final Lembrete lembreteExistente) {
         final boolean isEditing = lembreteExistente != null;
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+        // Data selecionada — começa com hoje ou com a data do lembrete
+        final String[] dataSelecionada = {
+                isEditing ? lembreteExistente.getData() : parseDateFormat.format(new Date())
+        };
+
+        // Infla o layout do dialog
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_novo_lembrete, null);
         final EditText tituloInput = dialogView.findViewById(R.id.edit_text_titulo_lembrete);
         final EditText horarioInput = dialogView.findViewById(R.id.edit_text_horario_lembrete);
 
-        TextView dialogTitle = new TextView(getContext());
-        dialogTitle.setPadding(60, 40, 60, 20);
-        dialogTitle.setTextSize(20);
-        dialogTitle.setTextColor(Color.WHITE);
+        // Botão para selecionar data (você pode adicionar esse TextView no dialog_novo_lembrete.xml)
+        // Se não tiver o campo, vamos usar um TextView criado dinamicamente
+        TextView btnSelecionarData = new TextView(getContext());
+        btnSelecionarData.setPadding(0, 8, 0, 8);
+        btnSelecionarData.setTextColor(Color.parseColor("#4FC3F7"));
+        btnSelecionarData.setTextSize(14f);
+        btnSelecionarData.setText("📅 Data: " + formatarDataParaExibicao(dataSelecionada[0]));
+        btnSelecionarData.setOnClickListener(v -> {
+            Calendar cal = Calendar.getInstance();
+            try {
+                Date d = parseDateFormat.parse(dataSelecionada[0]);
+                cal.setTime(d);
+            } catch (ParseException ignored) {}
+
+            new DatePickerDialog(
+                    requireContext(),
+                    (picker, year, month, dayOfMonth) -> {
+                        Calendar selecionado = Calendar.getInstance();
+                        selecionado.set(year, month, dayOfMonth);
+                        dataSelecionada[0] = parseDateFormat.format(selecionado.getTime());
+                        btnSelecionarData.setText("📅 Data: " + formatarDataParaExibicao(dataSelecionada[0]));
+                    },
+                    cal.get(Calendar.YEAR),
+                    cal.get(Calendar.MONTH),
+                    cal.get(Calendar.DAY_OF_MONTH)
+            ).show();
+        });
+
+        // Adiciona o botão de data no layout do dialog
+        if (dialogView instanceof ViewGroup) {
+            ((ViewGroup) dialogView).addView(btnSelecionarData, 0);
+        }
 
         if (isEditing) {
-            dialogTitle.setText("Editar Lembrete");
             tituloInput.setText(lembreteExistente.getTitulo());
             horarioInput.setText(lembreteExistente.getHorario());
-        } else {
-            dialogTitle.setText("Novo Lembrete");
         }
-        builder.setCustomTitle(dialogTitle);
 
-        builder.setView(dialogView);
-        builder.setPositiveButton("Salvar", (dialog, id) -> {
-            String titulo = tituloInput.getText().toString().trim();
-            String horario = horarioInput.getText().toString().trim();
+        // Cria o dialog com visual customizado
+        AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.DialogTheme)
+                .setTitle(isEditing ? "Editar Lembrete" : "Novo Lembrete")
+                .setView(dialogView)
+                .setPositiveButton("Salvar", null) // null para controlar o dismiss manualmente
+                .setNegativeButton("Cancelar", (d, id) -> d.dismiss())
+                .create();
 
-            if (titulo.isEmpty() || horario.isEmpty()) {
-                Toast.makeText(getContext(), "Por favor, preencha todos os campos.", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        // Estiliza o título
+        dialog.setOnShowListener(d -> {
+            // Cor do botão positivo
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#4FC3F7"));
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#8EADD4"));
 
-            try {
-                String[] partes = horario.split(":");
-                int hora = Integer.parseInt(partes[0]);
-                int minuto = Integer.parseInt(partes[1]);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                String titulo = tituloInput.getText().toString().trim();
+                String horario = horarioInput.getText().toString().trim();
 
-                if (isEditing) {
-                    atualizarLembrete(lembreteExistente, titulo, horario);
-                } else {
-                    String dataHoje = parseDateFormat.format(new Date());
-                    LembreteRequest req = new LembreteRequest(titulo, dataHoje, horario);
-                    registrarLembrete(req, hora, minuto, titulo);
+                if (titulo.isEmpty() || horario.isEmpty()) {
+                    Toast.makeText(getContext(), "Preencha todos os campos.", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                Toast.makeText(getContext(), "Formato de horário inválido (Use HH:mm).", Toast.LENGTH_SHORT).show();
-            }
 
+                try {
+                    String[] partes = horario.split(":");
+                    int hora = Integer.parseInt(partes[0]);
+                    int minuto = Integer.parseInt(partes[1]);
+
+                    if (isEditing) {
+                        atualizarLembrete(lembreteExistente, titulo, horario, dataSelecionada[0]);
+                    } else {
+                        LembreteRequest req = new LembreteRequest(titulo, dataSelecionada[0], horario);
+                        registrarLembrete(req, hora, minuto, titulo);
+                    }
+                    dialog.dismiss();
+
+                } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                    Toast.makeText(getContext(), "Formato inválido. Use HH:mm", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
-        builder.setNegativeButton("Cancelar", (dialog, id) -> dialog.dismiss());
-        builder.create().show();
+
+        dialog.show();
     }
 
+    private String formatarDataParaExibicao(String dataStr) {
+        try {
+            Date d = parseDateFormat.parse(dataStr);
+            return displayDateFormat.format(d);
+        } catch (ParseException e) {
+            return dataStr;
+        }
+    }
+
+    // =============================================
+    // LISTA — usa getListaFiltrada()
+    // =============================================
     private void atualizarListaDeLembretes() {
         if (binding == null) return;
         binding.containerLembretes.removeAllViews();
 
-        // 1. Agrupar lembretes por data
+        List<Lembrete> listaParaExibir = getListaFiltrada();
+
+        if (listaParaExibir.isEmpty()) {
+            TextView vazio = new TextView(getContext());
+            vazio.setText(filtroAtivo == null ? "Nenhum lembrete cadastrado." : "Nenhum lembrete nesta categoria.");
+            vazio.setTextColor(Color.parseColor("#8EADD4"));
+            vazio.setTextSize(14f);
+            vazio.setPadding(0, 24, 0, 0);
+            binding.containerLembretes.addView(vazio);
+            return;
+        }
+
         Map<String, List<Lembrete>> lembretesAgrupados = new HashMap<>();
-        for (Lembrete lembrete : listaDeLembretes) {
+        for (Lembrete lembrete : listaParaExibir) {
             try {
                 Date date = parseDateFormat.parse(lembrete.getData());
                 String dataFormatada = displayDateFormat.format(date);
                 if (!lembretesAgrupados.containsKey(dataFormatada)) {
-                    lembretesAgrupados.put(dataFormatada, new ArrayList<Lembrete>());
+                    lembretesAgrupados.put(dataFormatada, new ArrayList<>());
                 }
                 lembretesAgrupados.get(dataFormatada).add(lembrete);
             } catch (ParseException e) {
@@ -358,43 +422,30 @@ public class Lembretes extends Fragment {
             }
         }
 
-        // 2. Ordenar as datas (Mais recentes primeiro)
         List<String> datasOrdenadas = new ArrayList<>(lembretesAgrupados.keySet());
-        Collections.sort(datasOrdenadas, new Comparator<String>() {
-            @Override
-            public int compare(String s1, String s2) {
-                try {
-                    Date d1 = displayDateFormat.parse(s1);
-                    Date d2 = displayDateFormat.parse(s2);
-                    return d2.compareTo(d1); // Ordem decrescente
-                } catch (ParseException e) {
-                    return 0;
-                }
+        Collections.sort(datasOrdenadas, (s1, s2) -> {
+            try {
+                Date d1 = displayDateFormat.parse(s1);
+                Date d2 = displayDateFormat.parse(s2);
+                return d2.compareTo(d1);
+            } catch (ParseException e) {
+                return 0;
             }
         });
 
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
-        // 3. Renderizar grupos e itens
         for (String dataKey : datasOrdenadas) {
             final List<Lembrete> lembretesDoDia = lembretesAgrupados.get(dataKey);
 
             View groupView = inflater.inflate(R.layout.item_data_expandable, binding.containerLembretes, false);
             TextView dataHeader = groupView.findViewById(R.id.text_data_header);
-            final ImageView deleteGroupIcon = groupView.findViewById(R.id.icon_delete_group);
+            ImageView deleteGroupIcon = groupView.findViewById(R.id.icon_delete_group);
             final LinearLayout containerLembretesDoDia = groupView.findViewById(R.id.container_lembretes_do_dia);
 
             dataHeader.setText(dataKey);
-
-
+            deleteGroupIcon.setVisibility(View.GONE);
             lembretesDoDia.sort(Comparator.comparing(Lembrete::getHorario));
-
-
-            if (isEditMode) {
-                deleteGroupIcon.setVisibility(View.GONE); // Desativamos a exclusão de grupo para simplificar o backend
-            } else {
-                deleteGroupIcon.setVisibility(View.GONE);
-            }
 
             containerLembretesDoDia.removeAllViews();
             for (final Lembrete lembrete : lembretesDoDia) {
@@ -403,38 +454,34 @@ public class Lembretes extends Fragment {
                 ImageView deleteItemIcon = lembreteItemView.findViewById(R.id.icon_delete_item);
 
                 String status = lembrete.isAtivo() ? "(Concluído)" : "(Programado)";
-                String textoLembrete = String.format(Locale.getDefault(), "%s - %s %s", lembrete.getHorario(), lembrete.getTitulo(), status);
-                lembreteText.setText(textoLembrete);
+                lembreteText.setText(String.format(Locale.getDefault(), "%s - %s %s",
+                        lembrete.getHorario(), lembrete.getTitulo(), status));
 
                 if (isEditMode) {
                     deleteItemIcon.setVisibility(View.VISIBLE);
-                    deleteItemIcon.setColorFilter(ContextCompat.getColor(getContext(), R.color.red_dark), PorterDuff.Mode.SRC_IN);
+                    deleteItemIcon.setColorFilter(
+                            ContextCompat.getColor(getContext(), R.color.red_dark),
+                            PorterDuff.Mode.SRC_IN);
                     deleteItemIcon.setOnClickListener(v -> showDeleteConfirmationDialog(lembrete));
-
                     lembreteText.setOnClickListener(v -> showLembreteDialog(lembrete));
-
                 } else {
                     deleteItemIcon.setVisibility(View.GONE);
-                    lembreteText.setOnClickListener(null); // Desativa clique para edição
+                    lembreteText.setOnClickListener(null);
                 }
                 containerLembretesDoDia.addView(lembreteItemView);
             }
 
-            dataHeader.setOnClickListener(v -> {
-                containerLembretesDoDia.setVisibility(
-                        containerLembretesDoDia.getVisibility() == View.GONE ? View.VISIBLE : View.GONE
-                );
-            });
+            dataHeader.setOnClickListener(v ->
+                    containerLembretesDoDia.setVisibility(
+                            containerLembretesDoDia.getVisibility() == View.GONE
+                                    ? View.VISIBLE : View.GONE));
+
             binding.containerLembretes.addView(groupView);
         }
     }
 
     private void showDeleteConfirmationDialog(final Lembrete lembrete) {
-        if (lembrete == null || lembrete.getId() == null) {
-            Log.e("DELETE", "Lembrete ou ID nulo!");
-            return;
-        }
-
+        if (lembrete == null || lembrete.getId() == null) return;
         new AlertDialog.Builder(requireContext())
                 .setTitle("Excluir Lembrete")
                 .setMessage("Tem certeza que deseja excluir este lembrete?")
@@ -443,9 +490,7 @@ public class Lembretes extends Fragment {
                 .show();
     }
 
-
     private void atualizarPainelDeResumo() {
-        // Agora usamos a lista de backend (listaDeLembretes)
         long hojeCount = listaDeLembretes.stream().filter(l -> isToday(l.getData())).count();
         long programadosCount = listaDeLembretes.stream().filter(l -> !l.isAtivo()).count();
         long todosCount = listaDeLembretes.size();
@@ -475,27 +520,21 @@ public class Lembretes extends Fragment {
             return hoje.get(Calendar.YEAR) == data.get(Calendar.YEAR) &&
                     hoje.get(Calendar.DAY_OF_YEAR) == data.get(Calendar.DAY_OF_YEAR);
         } catch (ParseException e) {
-            Log.e("Lembretes", "Erro ao parsear data: " + dataStr, e);
             return false;
         }
     }
-
 
     private void agendarLembrete(int hora, int minuto, String titulo, String mensagem) {
         Calendar c = Calendar.getInstance();
         c.set(Calendar.HOUR_OF_DAY, hora);
         c.set(Calendar.MINUTE, minuto);
         c.set(Calendar.SECOND, 0);
-
-        if (c.before(Calendar.getInstance())) {
-            c.add(Calendar.DAY_OF_MONTH, 1);
-        }
+        if (c.before(Calendar.getInstance())) c.add(Calendar.DAY_OF_MONTH, 1);
 
         Intent intent = new Intent(getContext(), LembreteReceiver.class);
         intent.putExtra("titulo", titulo);
         intent.putExtra("mensagem", mensagem);
 
-        // Usamos um ID baseado no tempo para ter múltiplos alarmes
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 getContext(),
                 (int) System.currentTimeMillis(),
@@ -504,38 +543,19 @@ public class Lembretes extends Fragment {
         );
 
         AlarmManager alarmManager = (AlarmManager) requireActivity().getSystemService(Context.ALARM_SERVICE);
-
         if (alarmManager != null) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
                 if (alarmManager.canScheduleExactAlarms()) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            c.getTimeInMillis(),
-                            pendingIntent
-                    );
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
                 } else {
-                    alarmManager.set(
-                            AlarmManager.RTC_WAKEUP,
-                            c.getTimeInMillis(),
-                            pendingIntent
-                    );
-                    Toast.makeText(getContext(), "Permissão de alarmes exatos necessária. Agendado como aproximado.", Toast.LENGTH_LONG).show();
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
+                    Toast.makeText(getContext(), "Agendado como alarme aproximado.", Toast.LENGTH_LONG).show();
                 }
             } else {
-                alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        c.getTimeInMillis(),
-                        pendingIntent
-                );
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
             }
-
-
-        } else {
-            Toast.makeText(getContext(), "Não foi possível acessar AlarmManager.", Toast.LENGTH_SHORT).show();
         }
-
     }
-
 
     @Override
     public void onDestroyView() {
