@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import androidx.activity.EdgeToEdge;
@@ -22,8 +23,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import br.fmu.projetoasthmaspace.Domain.DadosDetalhamentoCliente;
+import br.fmu.projetoasthmaspace.Domain.UserSessionManager;
 import br.fmu.projetoasthmaspace.R;
+import br.fmu.projetoasthmaspace.Service.ApiClient;
+import br.fmu.projetoasthmaspace.Service.ApiService;
 import br.fmu.projetoasthmaspace.databinding.ActivityMainBinding;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -105,16 +113,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void carregarNomeUsuario() {
-        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        String nomeCompleto = prefs.getString("user_name", null); // Pega o nome, ou null se não houver
+
+        UserSessionManager session = new UserSessionManager(this);
+        String nomeCompleto = session.getNome();
+        String token = session.getToken();
 
         if (nomeCompleto != null && !nomeCompleto.trim().isEmpty()) {
+
             String primeiroNome = nomeCompleto.split(" ")[0];
             binding.toolbarUserName.setText("Olá, " + primeiroNome);
             binding.toolbarUserName.setVisibility(View.VISIBLE);
-        } else {
-            // Se não houver nome salvo, esconde o TextView do nome
-            binding.toolbarUserName.setVisibility(View.GONE);
+
+        } else if (token != null) {
+
+            UserServiceHelper.buscarNomeUsuario(
+                    this,
+                    token,
+                    new UserServiceHelper.NomeCallback() {
+
+                        @Override
+                        public void onSuccess(String nome) {
+
+                            session.saveNome(nome);
+
+                            String primeiroNome = nome.split(" ")[0];
+                            binding.toolbarUserName.setText("Olá, " + primeiroNome);
+                            binding.toolbarUserName.setVisibility(View.VISIBLE);
+                        }
+
+                        @Override
+                        public void onError(String erro) {
+                            binding.toolbarUserName.setVisibility(View.GONE);
+                        }
+                    });
         }
     }
 
@@ -156,5 +187,7 @@ public class MainActivity extends AppCompatActivity {
             manager.createNotificationChannel(canal);
         }
     }
+
+
 
 }

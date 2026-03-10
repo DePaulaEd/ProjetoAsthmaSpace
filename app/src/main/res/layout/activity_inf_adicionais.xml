@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".InfAdicionais">
+    tools:context=".ActivityView.InfAdicionais">
 
     <ImageView
         android:id="@+id/corFundo"
@@ -54,6 +54,21 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- Canto superior esquerdo, mais próximo do topo -->
+            <ImageButton
+                android:id="@+id/btn_voltar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="-15dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/btn_voltar_background"
+                android:contentDescription="Voltar"
+                android:padding="12dp"
+                android:src="@drawable/ic_arrow_back"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/white" />
 
             <TextView
                 android:id="@+id/textInfAdicionais"
@@ -190,7 +205,7 @@
 
 
                 <LinearLayout
-                    id="@+id/vertLogradouro"
+                    android:id="@+id/vertLogradouro"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
@@ -226,7 +241,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    id="@+id/vertNumero"
+                    android:id="@+id/vertNumero"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
@@ -301,7 +316,7 @@
                 app:layout_constraintTop_toBottomOf="@id/editTextComplemento">
 
                 <LinearLayout
-                    id="@+id/vertCep"
+                    android:id="@+id/vertCep"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
@@ -337,7 +352,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    id="@+id/vertBairro"
+                    android:id="@+id/vertBairro"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
@@ -383,7 +398,7 @@
                 app:layout_constraintTop_toBottomOf="@id/horizontCepBairro">
 
                 <LinearLayout
-                    id="@+id/vertCidade"
+                    android:id="@+id/vertCidade"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
@@ -419,7 +434,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    id="@+id/vertEstado"
+                    android:id="@+id/vertEstado"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
