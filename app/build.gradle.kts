@@ -56,4 +56,11 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
+    // Room
+    implementation("androidx.room:room-runtime:2.6.1")
+    annotationProcessor("androidx.room:room-compiler:2.6.1")
+
+// WorkManager
+    implementation("androidx.work:work-runtime:2.9.0")
+
 }

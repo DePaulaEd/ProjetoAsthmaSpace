@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ActivityView.InfAdicionais">
+    tools:context=".Presentation.ActivityView.InfAdicionaisActivity">
 
     <ImageView
         android:id="@+id/corFundo"
@@ -55,20 +55,19 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Canto superior esquerdo, mais próximo do topo -->
             <ImageButton
                 android:id="@+id/btn_voltar"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginStart="-15dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="20dp"
                 android:background="@drawable/btn_voltar_background"
                 android:contentDescription="Voltar"
                 android:padding="12dp"
                 android:src="@drawable/ic_arrow_back"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/white" />
+                app:tint="#4FC3F7" />
 
             <TextView
                 android:id="@+id/textInfAdicionais"
@@ -114,6 +113,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textMedicamentos" />
 
+            <!-- ✅ SEÇÃO PROBLEMAS RESPIRATÓRIOS COM CHECKBOXES -->
             <TextView
                 android:id="@+id/textProblemRespiratorios"
                 android:layout_width="324dp"
@@ -129,19 +129,80 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/editTextMedicamentos" />
 
-            <EditText
-                android:id="@+id/editTextProblemRespiratorios"
+            <LinearLayout
+                android:id="@+id/layoutCheckboxesRespiratorios"
                 android:layout_width="280dp"
-                android:layout_height="65dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:background="@drawable/text_box"
-                android:inputType="text"
-                android:padding="2dp"
-                android:textSize="12dp"
+                android:orientation="vertical"
+                android:padding="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textProblemRespiratorios" />
+                app:layout_constraintTop_toBottomOf="@id/textProblemRespiratorios">
+
+                <CheckBox
+                    android:id="@+id/checkAsma"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/white"
+                    android:text="Asma"
+                    android:textColor="@color/white"
+                    android:textSize="12dp" />
+
+                <CheckBox
+                    android:id="@+id/checkRinite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/white"
+                    android:text="Rinite"
+                    android:textColor="@color/white"
+                    android:textSize="12dp" />
+
+                <CheckBox
+                    android:id="@+id/checkBronquite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/white"
+                    android:text="Bronquite"
+                    android:textColor="@color/white"
+                    android:textSize="12dp" />
+
+                <CheckBox
+                    android:id="@+id/checkDpoc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/white"
+                    android:text="DPOC"
+                    android:textColor="@color/white"
+                    android:textSize="12dp" />
+
+                <CheckBox
+                    android:id="@+id/checkOutros"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/white"
+                    android:text="Outros"
+                    android:textColor="@color/white"
+                    android:textSize="12dp" />
+
+                <EditText
+                    android:id="@+id/editTextOutrosRespiratorios"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/text_box"
+                    android:hint="Descreva o problema"
+                    android:inputType="text"
+                    android:padding="6dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="#80FFFFFF"
+                    android:textSize="12dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+            <!-- ✅ FIM SEÇÃO PROBLEMAS RESPIRATÓRIOS -->
 
             <TextView
                 android:id="@+id/textContatoEmerg"
@@ -156,7 +217,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/editTextProblemRespiratorios" />
+                app:layout_constraintTop_toBottomOf="@id/layoutCheckboxesRespiratorios" />
 
             <EditText
                 android:id="@+id/editTextContatoEmerg"
@@ -175,7 +236,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textContatoEmerg" />
 
-
             <TextView
                 android:id="@+id/textEndereco"
                 android:layout_width="match_parent"
@@ -192,7 +252,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/editTextContatoEmerg" />
 
-
             <LinearLayout
                 android:id="@+id/horizontLogradouroNumero"
                 android:layout_width="wrap_content"
@@ -202,7 +261,6 @@
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textEndereco">
-
 
                 <LinearLayout
                     android:id="@+id/vertLogradouro"
@@ -218,11 +276,7 @@
                         android:layout_marginRight="5dp"
                         android:text="Logradouro"
                         android:textColor="@color/white"
-                        android:textSize="13dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editTextMedicamentos" />
+                        android:textSize="13dp" />
 
                     <EditText
                         android:id="@+id/editTextLogradouro"
@@ -233,11 +287,7 @@
                         android:background="@drawable/text_box"
                         android:inputType="text"
                         android:padding="10dp"
-                        android:textSize="12dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/textLogradouro" />
+                        android:textSize="12dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -253,11 +303,7 @@
                         android:layout_marginTop="10dp"
                         android:text="Número"
                         android:textColor="@color/white"
-                        android:textSize="13dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editTextMedicamentos" />
+                        android:textSize="13dp" />
 
                     <EditText
                         android:id="@+id/editTextNumero"
@@ -267,11 +313,7 @@
                         android:background="@drawable/text_box"
                         android:inputType="number"
                         android:padding="10dp"
-                        android:textSize="12dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/textNumero" />
+                        android:textSize="12dp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -329,11 +371,7 @@
                         android:layout_marginRight="5dp"
                         android:text="CEP"
                         android:textColor="@color/white"
-                        android:textSize="13dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editTextComplemento" />
+                        android:textSize="13dp" />
 
                     <EditText
                         android:id="@+id/editTextCep"
@@ -344,11 +382,7 @@
                         android:background="@drawable/text_box"
                         android:inputType="number"
                         android:padding="10dp"
-                        android:textSize="12dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/textCep" />
+                        android:textSize="12dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -364,11 +398,7 @@
                         android:layout_marginTop="10dp"
                         android:text="Bairro"
                         android:textColor="@color/white"
-                        android:textSize="13dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editTextComplemento" />
+                        android:textSize="13dp" />
 
                     <EditText
                         android:id="@+id/editTextBairro"
@@ -378,11 +408,7 @@
                         android:background="@drawable/text_box"
                         android:inputType="text"
                         android:padding="10dp"
-                        android:textSize="12dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/textBairro" />
+                        android:textSize="12dp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -411,11 +437,7 @@
                         android:layout_marginRight="5dp"
                         android:text="Cidade"
                         android:textColor="@color/white"
-                        android:textSize="13dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editTextCep" />
+                        android:textSize="13dp" />
 
                     <EditText
                         android:id="@+id/editTextCidade"
@@ -426,11 +448,7 @@
                         android:background="@drawable/text_box"
                         android:inputType="text"
                         android:padding="10dp"
-                        android:textSize="12dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/textCidade" />
+                        android:textSize="12dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -446,11 +464,7 @@
                         android:layout_marginTop="10dp"
                         android:text="Estado"
                         android:textColor="@color/white"
-                        android:textSize="13dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/editTextBairro" />
+                        android:textSize="13dp" />
 
                     <EditText
                         android:id="@+id/editTextEstado"
@@ -460,11 +474,7 @@
                         android:background="@drawable/text_box"
                         android:inputType="text"
                         android:padding="10dp"
-                        android:textSize="12dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/textEstado" />
+                        android:textSize="12dp" />
                 </LinearLayout>
 
             </LinearLayout>

@@ -10,7 +10,7 @@
         android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
 
 
@@ -19,13 +19,14 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
+
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ProjetoAsthmaSpace"
         android:usesCleartextTraffic="true">
 
-        <receiver android:name=".Domain.LembreteReceiver" />
+        <receiver android:name=".Data.worker.LembreteReceiver" />
 
 
 
@@ -33,7 +34,7 @@
         <!--        android:name=".AppStart"-->
         <!--Vai ser a activity principal, porem agora para testes nao -->
         <activity
-            android:name=".ActivityView.Login"
+            android:name=".Presentation.ActivityView.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -43,13 +44,13 @@
 
         <!-- Outras Activities do fluxo de cadastro -->
         <activity
-            android:name=".ActivityView.Cadastrar"
+            android:name=".Presentation.ActivityView.CadastrarActivity"
             android:exported="true" />
         <activity
-            android:name=".ActivityView.InfAdicionais"
+            android:name=".Presentation.ActivityView.InfAdicionaisActivity"
             android:exported="true" />
 
-        <activity android:name=".ActivityView.InformacoesPessoais" android:exported="false" />
+        <activity android:name=".Presentation.ActivityView.InformacoesPessoaisActivity" android:exported="false" />
 
         <activity android:name=".ActivityView.EditarInformacoes" android:exported="false" />
 
@@ -57,12 +58,15 @@
 
         <!-- Activity Principal (com os fragmentos) -->
         <activity
-            android:name=".ActivityView.MainActivity"
+            android:name=".Presentation.ActivityView.MainActivity"
             android:exported="false" />
 
-        <activity android:name=".ActivityView.AjudaActivity" />
-        <activity android:name=".ActivityView.DiarioSintomasContainerActivity" />
-        <activity android:name=".ActivityView.Perfil" />
+        <activity android:name=".Presentation.ActivityView.AjudaActivity" />
+<!--        <activity android:name=".ActivityView.Perfil" />-->
+        <activity android:name=".Presentation.ActivityView.NotificacoesActivity" />
+        <activity android:name=".Presentation.ActivityView.ConfiguracoesActivity" />
+
+
 
 
         <!-- FileProvider para compartilhar arquivos -->
