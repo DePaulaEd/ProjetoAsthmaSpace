@@ -6,5 +6,5 @@ public class ViaCepResponse {
     public String localidade; // cidade
     public String uf;
     public String complemento;
-    public String erro;       // "true" se CEP não encontrado
+    public Boolean erro;       // "true" se CEP não encontrado
 }

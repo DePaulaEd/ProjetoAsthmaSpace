@@ -100,9 +100,23 @@
                     <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1E3A5F" android:layout_marginBottom="16dp"/>
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CPF" android:textColor="#8EADD4" android:textSize="11sp" android:textStyle="bold" android:letterSpacing="0.08" />
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
-                        <TextView android:id="@+id/txtCPF" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="#FFFFFF" android:textSize="15sp" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🔒" android:textSize="12sp" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <EditText
+                            android:id="@+id/edtCPF"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="#FFFFFF"
+                            android:textSize="15sp"
+                            android:hint="CPF (opcional)"
+                            android:inputType="number"
+                            android:background="@android:color/transparent" />
+
                     </LinearLayout>
                     <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1E3A5F" android:layout_marginBottom="16dp"/>
 
@@ -123,10 +137,39 @@
                                 android:padding="10dp" />
                             <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1E3A5F"/>
                         </LinearLayout>
-                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:paddingLeft="10dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Idade" android:textColor="#8EADD4" android:textSize="11sp" android:textStyle="bold" android:letterSpacing="0.08" />
-                            <EditText android:id="@+id/edtIdade" android:layout_width="match_parent" android:layout_height="48dp" android:textColor="#FFFFFF" android:textSize="16sp" android:background="@null" android:paddingTop="8dp" android:paddingBottom="8dp" android:hint="Anos" android:inputType="number" />
-                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1E3A5F"/>
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:paddingLeft="10dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Data de Nascimento"
+                                android:textColor="#8EADD4"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:letterSpacing="0.08" />
+
+                            <EditText
+                                android:id="@+id/edtDataNascimento"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:textColor="#FFFFFF"
+                                android:textSize="16sp"
+                                android:background="@null"
+                                android:paddingTop="8dp"
+                                android:paddingBottom="8dp"
+                                android:hint="DD/MM/AAAA"
+                                android:inputType="number"
+                                android:maxLength="10" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="#1E3A5F" />
                         </LinearLayout>
                     </LinearLayout>
 

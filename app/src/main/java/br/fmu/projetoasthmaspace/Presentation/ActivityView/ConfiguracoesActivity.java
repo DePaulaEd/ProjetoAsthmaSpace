@@ -232,7 +232,7 @@ public class ConfiguracoesActivity extends AppCompatActivity {
                                         "Aplicativo de apoio a pacientes com asma para monitorar " +
                                         "sintomas, qualidade do ar e lembretes de medicação.\n\n" +
                                         "Desenvolvido por: Paulo Rosa, Edimário Silva e Stefanne Pardim\n" +
-                                        "Contato: asthmaspace@fmu.br"
+                                        "Contato: asthmaspace@gmail.com"
                         )
                         .setPositiveButton("Fechar", null)
                         .show()
@@ -252,9 +252,7 @@ public class ConfiguracoesActivity extends AppCompatActivity {
     }
 
     private void fazerLogout() {
-        session.clear();
-        WorkManager.getInstance(this).cancelAllWork();
-
+        new UserSessionManager(this).logout(this);
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

@@ -3,6 +3,8 @@ package br.fmu.projetoasthmaspace.Core.Session;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.io.File;
+
 import br.fmu.projetoasthmaspace.Core.Domain.Log.SharedPreferencesKeys;
 
 public class UserSessionManager {
@@ -48,5 +50,28 @@ public class UserSessionManager {
     /* CLEAR SESSION */
     public void clear() {
         prefs.edit().clear().apply();
+    }
+
+    private static final String KEY_FOTO = "USER_FOTO_PATH";
+
+    public void saveFotoPath(String path) {
+        prefs.edit().putString(KEY_FOTO, path).apply();
+    }
+
+    public String getFotoPath() {
+        return prefs.getString(KEY_FOTO, null);
+    }
+
+    public void logout(Context context) {
+        // Apaga o arquivo físico da foto
+        String fotoPath = getFotoPath();
+        if (fotoPath != null) {
+            File arquivoFoto = new File(fotoPath);
+            if (arquivoFoto.exists()) {
+                arquivoFoto.delete();
+            }
+        }
+        // Limpa o SharedPreferences
+        clear();
     }
 }

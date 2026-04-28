@@ -6,12 +6,14 @@ public class AtualizarRequest {
     public String nome;
     public String telefone;
     public String sexo;
-    public Integer idade;
+    public String dataNascimento;
     public String medicamentos;
 
     public String contatoEmergencia;
     public String problema_respiratorio;
     public Endereco endereco;
+    public String cpf;
+
 
     public Endereco getEndereco() {
         return endereco;

@@ -2,6 +2,10 @@ package br.fmu.projetoasthmaspace.Data.Service.Client;
 
 import java.util.List;
 
+import br.fmu.projetoasthmaspace.Core.Domain.Log.ConsultaInfoResponse;
+import br.fmu.projetoasthmaspace.Core.Domain.Log.RedefinirSenhaRequest;
+import br.fmu.projetoasthmaspace.Core.Domain.Log.VerificarIdentidadeRequest;
+import br.fmu.projetoasthmaspace.Core.Domain.Log.VerificarIdentidadeResponse;
 import br.fmu.projetoasthmaspace.Core.Util.AlterarSenhaRequest;
 import br.fmu.projetoasthmaspace.Core.Util.AtualizarRequest;
 import br.fmu.projetoasthmaspace.Core.Domain.Cliente.ClienteResponse;
@@ -15,6 +19,7 @@ import br.fmu.projetoasthmaspace.Core.Domain.Lembretes.LembreteUpdateRequest;
 import br.fmu.projetoasthmaspace.Core.Domain.Log.LoginRequest;
 import br.fmu.projetoasthmaspace.Core.Domain.Log.TokenResponse;
 import br.fmu.projetoasthmaspace.Core.Domain.Log.UsuarioResponse;
+import br.fmu.projetoasthmaspace.Core.Util.PaginaResponse;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -24,6 +29,7 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ApiService {
 
@@ -53,10 +59,10 @@ public interface ApiService {
     @GET("clientes/me/id")
     Call<Long> getMeuId();
 
-    @GET("clientes/me")
-    Call<DadosDetalhamentoCliente> getMeuPerfil(
-            @Header("Authorization") String token
-    );
+//    @GET("clientes/me")
+//    Call<DadosDetalhamentoCliente> getMeuPerfil(
+//            @Header("Authorization") String token
+//    );
 
     @GET("/usuarios/me")
     Call<UsuarioResponse> getUsuarioLogado();
@@ -67,7 +73,10 @@ public interface ApiService {
     Call<Void> registrarSintoma(@Body DiarioRequest request);
 
     @GET("diario/listar")
-    Call<List<DiarioResponse>> listarDiario();
+    Call<PaginaResponse<DiarioResponse>> listarDiario(
+            @Query("page") int page,
+            @Query("size") int size
+    );
 
     @PUT("diario/atualizar/{id}")
     Call<DiarioResponse> atualizarDiario(@Path("id") Long id, @Body DiarioRequest request);
@@ -89,7 +98,10 @@ public interface ApiService {
     @POST("lembretes/cadastro")
     Call<Void> registrarLembrete (@Body LembreteRequest request);
     @GET("lembretes/listar")
-    Call<List<LembreteResponse>> listarLembretes();
+    Call<PaginaResponse<LembreteResponse>> listarLembretes(
+            @Query("page") int page,
+            @Query("size") int size
+    );
 
 
     @PUT("lembretes/atualizar/{id}")
@@ -100,6 +112,17 @@ public interface ApiService {
 
     @DELETE("/lembretes/deletar/{id}") // Verifique o endpoint correto
     Call<Void> deletarLembrete(@Path("id") Long id);
+
+    // -------- Redefinir Senha --------
+
+    @GET("auth/recuperar-senha/info")
+    Call<ConsultaInfoResponse> consultarInfoRecuperacao(@Query("email") String email);
+
+    @POST("auth/recuperar-senha/verificar")
+    Call<VerificarIdentidadeResponse> verificarIdentidade(@Body VerificarIdentidadeRequest req);
+
+    @POST("auth/recuperar-senha/redefinir")
+    Call<Void> redefinirSenha(@Body RedefinirSenhaRequest req);
 
 
 

@@ -10,7 +10,9 @@ public class DadosDetalhamentoCliente {
     private String email;
     private String telefone;
     private String cpf;
-    private int idade;
+
+//    private int idade;
+    private String dataNascimento;
     private String alergias;
     private String sexo;
     private Endereco endereco;
@@ -38,8 +40,8 @@ public class DadosDetalhamentoCliente {
     public String getCpf() { return cpf; }
     public void setCpf(String cpf) { this.cpf = cpf; }
 
-    public int getIdade() { return idade; }
-    public void setIdade(int idade) { this.idade = idade; }
+    public String getDataNascimento() { return dataNascimento; }
+    public void setDataNascimento(String dataNascimento) { this.dataNascimento = dataNascimento; }
 
     public String getSexo() { return sexo; }
     public void setSexo(String sexo) { this.sexo = sexo; }

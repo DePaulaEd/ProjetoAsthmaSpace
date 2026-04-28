@@ -1,11 +1,16 @@
 package br.fmu.projetoasthmaspace.Presentation.Fragment;
 
+import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +31,7 @@ import androidx.fragment.app.Fragment;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -40,6 +46,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import br.fmu.projetoasthmaspace.Core.Domain.Diario.DiarioParser;
 import br.fmu.projetoasthmaspace.Core.Domain.Diario.DiarioRequest;
 import br.fmu.projetoasthmaspace.Core.Domain.Diario.DiarioResponse;
+import br.fmu.projetoasthmaspace.Core.Util.PaginaResponse;
 import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.Data.Service.Client.ApiClient;
 import br.fmu.projetoasthmaspace.Data.Service.Client.ApiService;
@@ -64,6 +71,11 @@ public class DiarioSintomasFragment extends Fragment {
     private int periodoSelecionado = 1; // Padrão: último mês
     private boolean isDownloadingPdf = false;
 
+    // Variáveis de controle de paginação — adiciona junto com as outras no topo da classe
+    private int paginaAtual = 0;
+    private boolean carregando = false;
+    private boolean ultimaPagina = false;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -84,7 +96,8 @@ public class DiarioSintomasFragment extends Fragment {
         binding.fabAdicionarSintoma.setOnClickListener(v -> showNovoSintomaDialog());
         binding.fabEditarSintoma.setOnClickListener(v -> toggleEditMode());
 
-        carregarDiario();
+//        carregarDiario();
+        recarregarDiario();
     }
 
     /**
@@ -243,31 +256,67 @@ public class DiarioSintomasFragment extends Fragment {
      */
     private void salvarPdf(ResponseBody body) {
         try {
-            // Nome do arquivo
             String nomeArquivo = String.format("diario_sintomas_%dmeses_%d.pdf",
                     periodoSelecionado,
                     System.currentTimeMillis());
 
-            // Diretório de download
-            File diretorioDownload = requireContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-            File arquivo = new File(diretorioDownload, nomeArquivo);
+            Uri uriArquivo;
 
-            // Salvar arquivo
-            FileOutputStream outputStream = new FileOutputStream(arquivo);
-            outputStream.write(body.bytes());
-            outputStream.close();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Android 10+ — salva no Downloads público via MediaStore
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Downloads.DISPLAY_NAME, nomeArquivo);
+                values.put(MediaStore.Downloads.MIME_TYPE, "application/pdf");
+                values.put(MediaStore.Downloads.IS_PENDING, 1);
 
-            // Mostrar mensagem de sucesso
+                ContentResolver resolver = requireContext().getContentResolver();
+                uriArquivo = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+
+                if (uriArquivo == null) throw new Exception("Falha ao criar arquivo no MediaStore");
+
+                try (OutputStream os = resolver.openOutputStream(uriArquivo)) {
+                    os.write(body.bytes());
+                }
+
+                values.clear();
+                values.put(MediaStore.Downloads.IS_PENDING, 0);
+                resolver.update(uriArquivo, values, null, null);
+
+            } else {
+                // Android 9 e abaixo — Downloads público direto
+                File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                File arquivo = new File(dir, nomeArquivo);
+                try (FileOutputStream os = new FileOutputStream(arquivo)) {
+                    os.write(body.bytes());
+                }
+                uriArquivo = Uri.fromFile(arquivo);
+            }
+
             Toast.makeText(getContext(), "PDF salvo em Downloads", Toast.LENGTH_LONG).show();
-
-            // Abrir PDF automaticamente
-            abrirPdf(arquivo);
+            abrirPdf(uriArquivo);
 
         } catch (Exception e) {
             e.printStackTrace();
             mostrarErro("Erro ao salvar PDF: " + e.getMessage());
         } finally {
             restaurarBotaoPdf();
+        }
+    }
+
+    // Novo abrirPdf que recebe Uri direto
+    private void abrirPdf(Uri uri) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uri, "application/pdf");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(getContext(),
+                    "Nenhum aplicativo para abrir PDF. Arquivo salvo em Downloads.",
+                    Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarErro("Erro ao abrir PDF: " + e.getMessage());
         }
     }
 
@@ -328,13 +377,27 @@ public class DiarioSintomasFragment extends Fragment {
         }
     }
 
+    // Substitui o carregarDiario() atual
     private void carregarDiario() {
-        api.listarDiario().enqueue(new Callback<List<DiarioResponse>>() {
+        if (carregando || ultimaPagina) return;
+        carregando = true;
+
+        api.listarDiario(paginaAtual, 20).enqueue(new Callback<PaginaResponse<DiarioResponse>>() {
             @Override
-            public void onResponse(Call<List<DiarioResponse>> call, Response<List<DiarioResponse>> response) {
+            public void onResponse(Call<PaginaResponse<DiarioResponse>> call,
+                                   Response<PaginaResponse<DiarioResponse>> response) {
                 if (!isAdded()) return;
-                if (response.isSuccessful()) {
-                    diario = response.body();
+                carregando = false;
+
+                if (response.isSuccessful() && response.body() != null) {
+                    PaginaResponse<DiarioResponse> pagina = response.body();
+
+                    if (diario == null) diario = new ArrayList<>();
+                    diario.addAll(pagina.getContent());
+
+                    ultimaPagina = pagina.isLast();
+                    paginaAtual++;
+
                     filtrarDiarioPorPeriodo();
                 } else {
                     Toast.makeText(getContext(), "Erro ao carregar diário", Toast.LENGTH_SHORT).show();
@@ -342,13 +405,13 @@ public class DiarioSintomasFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<DiarioResponse>> call, Throwable t) {
+            public void onFailure(Call<PaginaResponse<DiarioResponse>> call, Throwable t) {
                 if (!isAdded()) return;
+                carregando = false;
                 Toast.makeText(getContext(), "Falha na conexão", Toast.LENGTH_SHORT).show();
             }
         });
     }
-
     private void atualizarTela() {
         atualizarTelaComDados(diario);
     }
@@ -429,6 +492,16 @@ public class DiarioSintomasFragment extends Fragment {
             itemView.setTag(resp);
             container.addView(itemView);
         }
+    }
+
+    // Método para resetar e recarregar do zero — chama esse no lugar de carregarDiario()
+// nos casos de registrarSintoma, excluirAnotacao e exitEditMode
+    private void recarregarDiario() {
+        paginaAtual = 0;
+        ultimaPagina = false;
+        carregando = false;
+        diario = new ArrayList<>();
+        carregarDiario();
     }
 
     private void exibirDatasAnteriores(Map<String, List<DiarioResponse>> map) {
@@ -596,7 +669,9 @@ public class DiarioSintomasFragment extends Fragment {
             Toast.makeText(getContext(), "Falha ao salvar " + errors.size() + " itens.", Toast.LENGTH_LONG).show();
         }
 
-        carregarDiario();
+//        carregarDiario();
+        recarregarDiario();
+
     }
 
     private void excluirAnotacao(Long id) {
@@ -609,7 +684,8 @@ public class DiarioSintomasFragment extends Fragment {
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             if (isAdded() && response.isSuccessful()) {
                                 Toast.makeText(getContext(), "Anotação excluída", Toast.LENGTH_SHORT).show();
-                                carregarDiario();
+//                                carregarDiario();
+                                recarregarDiario();
                             } else if (isAdded()) {
                                 Toast.makeText(getContext(), "Falha ao excluir anotação", Toast.LENGTH_SHORT).show();
                             }

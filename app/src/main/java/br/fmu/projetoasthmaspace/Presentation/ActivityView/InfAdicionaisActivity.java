@@ -2,6 +2,7 @@ package br.fmu.projetoasthmaspace.Presentation.ActivityView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -37,7 +38,7 @@ public class InfAdicionaisActivity extends AppCompatActivity {
     private String email;
     private String cpf;
     private String telefone;
-    private String idade;
+    private String dataNascimento;
     private String sexo;
     private String senha;
 
@@ -56,7 +57,7 @@ public class InfAdicionaisActivity extends AppCompatActivity {
         email       = getIntent().getStringExtra("email");
         cpf         = getIntent().getStringExtra("cpf");
         telefone    = getIntent().getStringExtra("telefone");
-        idade       = getIntent().getStringExtra("idade");
+        dataNascimento       = getIntent().getStringExtra("dataNascimento");
         sexo        = getIntent().getStringExtra("sexo");
         senha       = getIntent().getStringExtra("senha");
 
@@ -102,34 +103,53 @@ public class InfAdicionaisActivity extends AppCompatActivity {
         ApiViaCep.getService().buscarCep(cep).enqueue(new Callback<ViaCepResponse>() {
             @Override
             public void onResponse(Call<ViaCepResponse> call, Response<ViaCepResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    ViaCepResponse dados = response.body();
 
-                    if ("true".equals(dados.erro)) {
-                        Toast.makeText(InfAdicionaisActivity.this,
-                                "CEP não encontrado", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
 
-                    binding.editTextLogradouro.setText(dados.logradouro);
-                    binding.editTextBairro.setText(dados.bairro);
-                    binding.editTextCidade.setText(dados.localidade);
-                    binding.editTextEstado.setText(dados.uf);
-
-                    if (dados.complemento != null && !dados.complemento.isEmpty()) {
-                        binding.editTextComplemento.setText(dados.complemento);
-                    }
-
-                    binding.editTextNumero.requestFocus();
+                if (!response.isSuccessful() || response.body() == null) {
+                    Toast.makeText(InfAdicionaisActivity.this,
+                            "CEP inválido ou não encontrado", Toast.LENGTH_SHORT).show();
+                    limparCamposCep();
+                    return;
                 }
+
+                ViaCepResponse dados = response.body();
+                Log.d("VIA_CEP", "erro field: " + dados.erro);
+                Log.d("VIA_CEP", "logradouro: " + dados.logradouro);
+
+                if (Boolean.TRUE.equals(dados.erro)) {
+                    Toast.makeText(InfAdicionaisActivity.this,
+                            "CEP não encontrado", Toast.LENGTH_SHORT).show();
+                    limparCamposCep();
+                    return;
+                }
+
+                binding.editTextLogradouro.setText(dados.logradouro);
+                binding.editTextBairro.setText(dados.bairro);
+                binding.editTextCidade.setText(dados.localidade);
+                binding.editTextEstado.setText(dados.uf);
+
+                if (dados.complemento != null && !dados.complemento.isEmpty()) {
+                    binding.editTextComplemento.setText(dados.complemento);
+                }
+
+                binding.editTextNumero.requestFocus();
             }
 
             @Override
             public void onFailure(Call<ViaCepResponse> call, Throwable t) {
                 Toast.makeText(InfAdicionaisActivity.this,
-                        "Erro ao buscar CEP", Toast.LENGTH_SHORT).show();
+                        "Erro ao buscar CEP. Verifique sua conexão.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void limparCamposCep() {
+        binding.editTextLogradouro.setText("");
+        binding.editTextBairro.setText("");
+        binding.editTextCidade.setText("");
+        binding.editTextEstado.setText("");
+        binding.editTextNumero.setText("");
+        binding.editTextComplemento.setText("");
     }
 
     private void enviarCadastro() {
@@ -147,9 +167,9 @@ public class InfAdicionaisActivity extends AppCompatActivity {
                 nomeUsuario,
                 email,
                 telefone,
-                cpf,
+                cpf == null || cpf.trim().isEmpty() ? null : cpf,
                 senha,
-                Integer.parseInt(idade),
+                dataNascimento,
                 sexo,
                 endereco,
                 coletarProblemasRespiratorios(),

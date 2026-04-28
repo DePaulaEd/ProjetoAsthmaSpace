@@ -147,6 +147,20 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textSenha" />
 
+            <TextView
+                android:id="@+id/textEsqueceuSenha"
+                android:layout_width="280dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Esqueceu a senha?"
+                android:textAlignment="textEnd"
+                android:textColor="@color/turquoise_light"
+                android:textSize="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/editTextSenha" />
+
+
             <Button
                 android:id="@+id/btnEntrar"
                 android:layout_width="280dp"
@@ -159,7 +173,7 @@
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/editTextSenha" />
+                app:layout_constraintTop_toBottomOf="@id/textEsqueceuSenha" />
 
             <TextView
                 android:id="@+id/textTermServ"

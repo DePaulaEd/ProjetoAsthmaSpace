@@ -1,10 +1,14 @@
 package br.fmu.projetoasthmaspace.Presentation.ActivityView;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.Objects;
 
 import br.fmu.projetoasthmaspace.Data.Service.ViaCep.ApiViaCep;
 import br.fmu.projetoasthmaspace.Core.Util.AtualizarRequest;
@@ -26,6 +30,10 @@ public class InformacoesPessoaisActivity extends AppCompatActivity {
     private DadosDetalhamentoCliente dadosAtuais;
     private boolean carregandoDados = false;
 
+    private String snapNome, snapTelefone, snapCpf, snapDataNascimento, snapSexo;
+    private String snapMedicamentos, snapProblemaResp, snapEmergencia;
+    private String snapCep, snapLogradouro, snapNumero, snapComplemento, snapBairro, snapCidade, snapUf;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,16 +42,13 @@ public class InformacoesPessoaisActivity extends AppCompatActivity {
 
         api = ApiClient.getApiService(getApplicationContext());
 
-        Log.d("INFO_PESSOAIS", "Tela aberta — sincronizando com backend");
-
         carregarDadosBackend();
+        configurarMascaraData();
 
         binding.edtCEP.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus && !carregandoDados) {
                 String cep = binding.edtCEP.getText().toString().trim();
-                if (cep.matches("\\d{8}")) {
-                    buscarCep(cep);
-                }
+                if (cep.matches("\\d{8}")) buscarCep(cep);
             }
         });
 
@@ -51,6 +56,32 @@ public class InformacoesPessoaisActivity extends AppCompatActivity {
         binding.btnSalvar.setOnClickListener(v -> salvarAlteracoes());
     }
 
+    // --------------------------------------------------------- máscara data
+    private void configurarMascaraData() {
+        binding.edtDataNascimento.addTextChangedListener(new TextWatcher() {
+            private boolean isUpdating = false;
+
+            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+            @Override public void onTextChanged(CharSequence s, int st, int b, int c) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (isUpdating) return;
+                String digits = s.toString().replaceAll("[^0-9]", "");
+                StringBuilder formatted = new StringBuilder();
+                for (int i = 0; i < digits.length() && i < 8; i++) {
+                    if (i == 2 || i == 4) formatted.append("/");
+                    formatted.append(digits.charAt(i));
+                }
+                isUpdating = true;
+                binding.edtDataNascimento.setText(formatted.toString());
+                binding.edtDataNascimento.setSelection(formatted.length());
+                isUpdating = false;
+            }
+        });
+    }
+
+    // --------------------------------------------------------- backend
     private void carregarDadosBackend() {
         api.getMeuPerfil().enqueue(new Callback<DadosDetalhamentoCliente>() {
             @Override
@@ -59,6 +90,7 @@ public class InformacoesPessoaisActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     dadosAtuais = response.body();
                     atualizarUI(dadosAtuais);
+                    tirarSnapshot();
                 } else {
                     Toast.makeText(InformacoesPessoaisActivity.this,
                             "Erro ao buscar dados", Toast.LENGTH_SHORT).show();
@@ -74,19 +106,75 @@ public class InformacoesPessoaisActivity extends AppCompatActivity {
         });
     }
 
+    private void tirarSnapshot() {
+        snapNome          = binding.edtNome.getText().toString().trim();
+        snapTelefone      = binding.edtTelefone.getText().toString().trim();
+        snapCpf           = binding.edtCPF.getText().toString().trim();
+        snapDataNascimento = binding.edtDataNascimento.getText().toString().trim();
+        snapSexo          = binding.spinnerSexo.getSelectedItem().toString();
+        snapMedicamentos  = binding.edtMedicamentos.getText().toString().trim();
+        snapProblemaResp  = binding.edtProblemaResp.getText().toString().trim();
+        snapEmergencia    = binding.edtEmergencia.getText().toString().trim();
+        snapCep           = binding.edtCEP.getText().toString().trim();
+        snapLogradouro    = binding.edtLogradouro.getText().toString().trim();
+        snapNumero        = binding.edtNumero.getText().toString().trim();
+        snapComplemento   = binding.edtComplemento.getText().toString().trim();
+        snapBairro        = binding.edtBairro.getText().toString().trim();
+        snapCidade        = binding.edtCidade.getText().toString().trim();
+        snapUf            = binding.edtUF.getText().toString().trim();
+    }
+
+    private boolean houveAlteracao() {
+        return !eq(binding.edtNome.getText().toString().trim(),              snapNome)
+                || !eq(binding.edtTelefone.getText().toString().trim(),          snapTelefone)
+                || !eq(binding.edtCPF.getText().toString().trim(),               snapCpf)
+                || !eq(binding.edtDataNascimento.getText().toString().trim(),    snapDataNascimento)
+                || !eq(binding.spinnerSexo.getSelectedItem().toString(),         snapSexo)
+                || !eq(binding.edtMedicamentos.getText().toString().trim(),      snapMedicamentos)
+                || !eq(binding.edtProblemaResp.getText().toString().trim(),      snapProblemaResp)
+                || !eq(binding.edtEmergencia.getText().toString().trim(),        snapEmergencia)
+                || !eq(binding.edtCEP.getText().toString().trim(),               snapCep)
+                || !eq(binding.edtLogradouro.getText().toString().trim(),        snapLogradouro)
+                || !eq(binding.edtNumero.getText().toString().trim(),            snapNumero)
+                || !eq(binding.edtComplemento.getText().toString().trim(),       snapComplemento)
+                || !eq(binding.edtBairro.getText().toString().trim(),            snapBairro)
+                || !eq(binding.edtCidade.getText().toString().trim(),            snapCidade)
+                || !eq(binding.edtUF.getText().toString().trim(),                snapUf);
+    }
+
+    private boolean eq(String a, String b) { return Objects.equals(a, b); }
+
     private void atualizarUI(DadosDetalhamentoCliente d) {
         carregandoDados = true;
 
         binding.edtNome.setText(safe(d.getNome()));
         binding.txtEmail.setText(safe(d.getEmail()));
         binding.edtTelefone.setText(safe(d.getTelefone()));
-        binding.txtCPF.setText(safe(d.getCpf()));
-        binding.edtIdade.setText(safeInt(d.getIdade()));
+
+        String cpfAtual = safe(d.getCpf());
+        binding.edtCPF.setText(cpfAtual);
+        if (!cpfAtual.isEmpty()) {
+            binding.edtCPF.setEnabled(false);
+            binding.edtCPF.setTextColor(0xFF8EADD4);
+        } else {
+            binding.edtCPF.setEnabled(true);
+            binding.edtCPF.setTextColor(getColor(android.R.color.white));
+        }
+
+        // Converte yyyy-MM-dd → DD/MM/AAAA para exibição
+        String dataBanco = safe(d.getDataNascimento());
+        if (dataBanco.contains("-")) {
+            try {
+                String[] p = dataBanco.split("-");
+                dataBanco = p[2] + "/" + p[1] + "/" + p[0];
+            } catch (Exception ignored) {}
+        }
+        binding.edtDataNascimento.setText(dataBanco);
+
         binding.edtMedicamentos.setText(safe(d.getMedicamentos()));
         binding.edtProblemaResp.setText(safe(d.getProblema_respiratorio()));
         binding.edtEmergencia.setText(safe(d.getContatoEmergencia()));
 
-        // Seleciona o sexo no Spinner
         String sexo = safe(d.getSexo());
         String[] opcoesSexo = getResources().getStringArray(R.array.spinner_sexo);
         for (int i = 0; i < opcoesSexo.length; i++) {
@@ -112,6 +200,11 @@ public class InformacoesPessoaisActivity extends AppCompatActivity {
     private void salvarAlteracoes() {
         if (dadosAtuais == null) return;
 
+        if (!houveAlteracao()) {
+            Toast.makeText(this, "Nenhuma alteração detectada.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String cep         = nullIfEmpty(binding.edtCEP.getText().toString());
         String logradouro  = nullIfEmpty(binding.edtLogradouro.getText().toString());
         String bairro      = nullIfEmpty(binding.edtBairro.getText().toString());
@@ -120,11 +213,14 @@ public class InformacoesPessoaisActivity extends AppCompatActivity {
         String numero      = nullIfEmpty(binding.edtNumero.getText().toString());
         String complemento = nullIfEmpty(binding.edtComplemento.getText().toString());
 
-        boolean algumPreenchido = cep != null || logradouro != null || bairro != null || cidade != null || uf != null;
-        boolean todosObrigatoriosPreenchidos = cep != null && logradouro != null && bairro != null && cidade != null && uf != null;
+        boolean algumPreenchido = cep != null || logradouro != null || bairro != null
+                || cidade != null || uf != null;
+        boolean todosObrigatoriosPreenchidos = cep != null && logradouro != null
+                && bairro != null && cidade != null && uf != null;
 
         if (algumPreenchido && !todosObrigatoriosPreenchidos) {
-            Toast.makeText(this, "Preencha todos os campos obrigatórios do endereço", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Preencha todos os campos obrigatórios do endereço",
+                    Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -133,9 +229,21 @@ public class InformacoesPessoaisActivity extends AppCompatActivity {
             return;
         }
 
+        // Converte DD/MM/AAAA → yyyy-MM-dd para o backend
+        String dataExibida = binding.edtDataNascimento.getText().toString().trim();
+        String dataFormatada = null;
+        if (dataExibida.length() == 10) {
+            try {
+                String[] p = dataExibida.split("/");
+                dataFormatada = p[2] + "-" + p[1] + "-" + p[0];
+            } catch (Exception e) {
+                Toast.makeText(this, "Data de nascimento inválida.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         binding.btnSalvar.setEnabled(false);
         binding.btnSalvar.setText("Salvando...");
-
 
         String sexoSelecionado = binding.spinnerSexo.getSelectedItem().toString();
 
@@ -143,10 +251,15 @@ public class InformacoesPessoaisActivity extends AppCompatActivity {
         request.nome                  = nullIfEmpty(binding.edtNome.getText().toString());
         request.telefone              = nullIfEmpty(binding.edtTelefone.getText().toString());
         request.sexo                  = nullIfEmpty(sexoSelecionado);
-        request.idade                 = parseInt(binding.edtIdade.getText().toString().trim());
+        request.dataNascimento        = dataFormatada; // yyyy-MM-dd ou null
         request.medicamentos          = nullIfEmpty(binding.edtMedicamentos.getText().toString());
         request.contatoEmergencia     = nullIfEmpty(binding.edtEmergencia.getText().toString());
         request.problema_respiratorio = nullIfEmpty(binding.edtProblemaResp.getText().toString());
+
+        String cpfAtual = safe(dadosAtuais.getCpf());
+        request.cpf = cpfAtual.isEmpty()
+                ? nullIfEmpty(binding.edtCPF.getText().toString())
+                : null;
 
         if (algumPreenchido) {
             Endereco end = new Endereco();
@@ -172,6 +285,7 @@ public class InformacoesPessoaisActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     dadosAtuais = response.body();
                     atualizarUI(dadosAtuais);
+                    tirarSnapshot();
                     Toast.makeText(InformacoesPessoaisActivity.this,
                             "✓ Alterações salvas!", Toast.LENGTH_SHORT).show();
                 } else {
@@ -186,58 +300,65 @@ public class InformacoesPessoaisActivity extends AppCompatActivity {
                 binding.btnSalvar.setEnabled(true);
                 binding.btnSalvar.setText("Salvar Alterações");
                 Log.e("INFO_PESSOAIS", "Falha: " + t.getMessage());
-                Log.e("INFO_PESSOAIS", "Causa: " + t.getCause());
                 Toast.makeText(InformacoesPessoaisActivity.this,
                         "Falha na comunicação", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    // --------------------------------------------------------- CEP
     private void buscarCep(String cep) {
         ApiViaCep.getService().buscarCep(cep).enqueue(new Callback<ViaCepResponse>() {
             @Override
             public void onResponse(Call<ViaCepResponse> call, Response<ViaCepResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    ViaCepResponse dados = response.body();
-                    if ("true".equals(dados.erro)) {
-                        Toast.makeText(InformacoesPessoaisActivity.this, "CEP não encontrado", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    binding.edtLogradouro.setText(dados.logradouro);
-                    binding.edtBairro.setText(dados.bairro);
-                    binding.edtCidade.setText(dados.localidade);
-                    binding.edtUF.setText(dados.uf);
-                    if (dados.complemento != null && !dados.complemento.isEmpty()) {
-                        binding.edtComplemento.setText(dados.complemento);
-                    }
-                    binding.edtNumero.requestFocus();
+                if (!response.isSuccessful() || response.body() == null) {
+                    Toast.makeText(InformacoesPessoaisActivity.this,
+                            "CEP inválido ou não encontrado", Toast.LENGTH_SHORT).show();
+                    limparCamposCep();
+                    return;
                 }
+                ViaCepResponse dados = response.body();
+                if (Boolean.TRUE.equals(dados.erro)) {
+                    Toast.makeText(InformacoesPessoaisActivity.this,
+                            "CEP não encontrado", Toast.LENGTH_SHORT).show();
+                    limparCamposCep();
+                    return;
+                }
+                binding.edtLogradouro.setText(dados.logradouro);
+                binding.edtBairro.setText(dados.bairro);
+                binding.edtCidade.setText(dados.localidade);
+                binding.edtUF.setText(dados.uf);
+                if (dados.complemento != null && !dados.complemento.isEmpty())
+                    binding.edtComplemento.setText(dados.complemento);
+                binding.edtNumero.requestFocus();
             }
 
             @Override
             public void onFailure(Call<ViaCepResponse> call, Throwable t) {
-                Toast.makeText(InformacoesPessoaisActivity.this, "Erro ao buscar CEP", Toast.LENGTH_SHORT).show();
+                Toast.makeText(InformacoesPessoaisActivity.this,
+                        "Erro ao buscar CEP.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    private void limparCamposCep() {
+        binding.edtLogradouro.setText("");
+        binding.edtBairro.setText("");
+        binding.edtCidade.setText("");
+        binding.edtUF.setText("");
+        binding.edtNumero.setText("");
+        binding.edtComplemento.setText("");
+    }
+
+    // --------------------------------------------------------- helpers
     private String nullIfEmpty(String s) {
         if (s == null) return null;
-        String trimmed = s.trim();
-        return trimmed.isEmpty() ? null : trimmed;
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
     }
 
     private String safe(String s) {
         return (s == null || s.trim().isEmpty()) ? "" : s;
-    }
-
-    private String safeInt(Integer v) {
-        return (v == null || v == 0) ? "" : String.valueOf(v);
-    }
-
-    private Integer parseInt(String s) {
-        try { return Integer.parseInt(s); }
-        catch (NumberFormatException e) { return null; }
     }
 
     @Override
@@ -246,6 +367,5 @@ public class InformacoesPessoaisActivity extends AppCompatActivity {
         dadosAtuais = null;
         binding = null;
         api = null;
-        Log.d("INFO_PESSOAIS", "Dados destruídos ao sair da tela");
     }
 }

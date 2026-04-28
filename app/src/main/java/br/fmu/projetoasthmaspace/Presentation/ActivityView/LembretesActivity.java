@@ -40,6 +40,7 @@ import java.util.TimeZone;
 
 import br.fmu.projetoasthmaspace.Core.Domain.Lembretes.Lembrete;
 import br.fmu.projetoasthmaspace.Core.Util.LocationHelper;
+import br.fmu.projetoasthmaspace.Core.Util.PaginaResponse;
 import br.fmu.projetoasthmaspace.Data.worker.LembreteReceiver;
 import br.fmu.projetoasthmaspace.Core.Domain.Lembretes.LembreteRequest;
 import br.fmu.projetoasthmaspace.Core.Domain.Lembretes.LembreteResponse;
@@ -65,7 +66,13 @@ public class LembretesActivity extends Fragment {
 
     private String filtroAtivo = null;
 
+    private int paginaAtual = 0;
+    private boolean carregando = false;
+    private boolean ultimaPagina = false;
+
     private final List<Lembrete> listaDeLembretes = new ArrayList<>();
+
+
 
     @Nullable
     @Override
@@ -151,8 +158,10 @@ public class LembretesActivity extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        carregarLembretesDoBackend();
+//        carregarLembretesDoBackend();
+        recarregarLembretes();
     }
+
 
     private void toggleUiForEditMode() {
         if (isEditMode) {
@@ -166,20 +175,28 @@ public class LembretesActivity extends Fragment {
 
     // --- Backend ---
 
+    // Substitui carregarLembretesDoBackend() atual
     private void carregarLembretesDoBackend() {
-        api.listarLembretes().enqueue(new Callback<List<LembreteResponse>>() {
+        if (carregando || ultimaPagina) return;
+        carregando = true;
+
+        api.listarLembretes(paginaAtual, 50).enqueue(new Callback<PaginaResponse<LembreteResponse>>() {
             @Override
-            public void onResponse(Call<List<LembreteResponse>> call, Response<List<LembreteResponse>> response) {
+            public void onResponse(Call<PaginaResponse<LembreteResponse>> call,
+                                   Response<PaginaResponse<LembreteResponse>> response) {
+                if (!isAdded()) return;
+                carregando = false;
+
                 if (response.isSuccessful() && response.body() != null) {
                     new Thread(() -> {
                         List<Lembrete> tempLista = new ArrayList<>();
-                        for (LembreteResponse resp : response.body()) {
+                        for (LembreteResponse resp : response.body().getContent()) {
                             try {
                                 String dataStr = resp.getData();
                                 if (dataStr == null || dataStr.isEmpty()) {
                                     dataStr = parseDateFormat.format(new Date());
                                 }
-                                parseDateFormat.parse(dataStr); // valida
+                                parseDateFormat.parse(dataStr);
                                 tempLista.add(new Lembrete(
                                         resp.getId(),
                                         resp.getTitulo(),
@@ -192,8 +209,12 @@ public class LembretesActivity extends Fragment {
                                 Log.e("Lembretes", "Erro ao parsear data id: " + resp.getId(), e);
                             }
                         }
+
+                        PaginaResponse<LembreteResponse> pagina = response.body();
+                        ultimaPagina = pagina.isLast();
+                        paginaAtual++;
+
                         requireActivity().runOnUiThread(() -> {
-                            listaDeLembretes.clear();
                             listaDeLembretes.addAll(tempLista);
                             atualizarPainelDeResumo();
                             atualizarListaDeLembretes();
@@ -205,10 +226,21 @@ public class LembretesActivity extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<LembreteResponse>> call, Throwable t) {
+            public void onFailure(Call<PaginaResponse<LembreteResponse>> call, Throwable t) {
+                carregando = false;
                 Toast.makeText(getContext(), "Falha na conexão", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // Adiciona esse método — chama ele no lugar de carregarLembretesDoBackend()
+// nos métodos: registrarLembrete, atualizarLembrete, deletarLembrete, concluirLembrete e onResume
+    private void recarregarLembretes() {
+        paginaAtual = 0;
+        ultimaPagina = false;
+        carregando = false;
+        listaDeLembretes.clear();
+        carregarLembretesDoBackend();
     }
 
     private void registrarLembrete(LembreteRequest req, int hora, int minuto, String titulo) {
@@ -223,7 +255,8 @@ public class LembretesActivity extends Fragment {
                         agendarLembrete(hora, minuto, titulo, "Lembrete programado!");
                     });
 
-                    carregarLembretesDoBackend();
+//                    carregarLembretesDoBackend();
+                    recarregarLembretes();
                 } else {
                     Toast.makeText(getContext(), "Erro ao salvar!", Toast.LENGTH_SHORT).show();
                 }
@@ -251,7 +284,8 @@ public class LembretesActivity extends Fragment {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(getContext(), "Lembrete atualizado!", Toast.LENGTH_SHORT).show();
-                    carregarLembretesDoBackend();
+//                    carregarLembretesDoBackend();
+                    recarregarLembretes();
                 } else {
                     Toast.makeText(getContext(), "Erro ao atualizar (" + response.code() + ")", Toast.LENGTH_SHORT).show();
                 }
@@ -276,7 +310,8 @@ public class LembretesActivity extends Fragment {
                 if (!isAdded()) return;
                 if (response.isSuccessful()) {
                     Toast.makeText(getContext(), "Lembrete excluído!", Toast.LENGTH_SHORT).show();
-                    carregarLembretesDoBackend();
+//                    carregarLembretesDoBackend();
+                    recarregarLembretes();
                 } else {
                     Toast.makeText(getContext(), "Erro ao excluir (" + response.code() + ")", Toast.LENGTH_SHORT).show();
                 }
@@ -597,7 +632,8 @@ public class LembretesActivity extends Fragment {
                 if (!isAdded()) return;
                 if (response.isSuccessful()) {
                     Toast.makeText(getContext(), "Lembrete concluído!", Toast.LENGTH_SHORT).show();
-                    carregarLembretesDoBackend();
+//                    carregarLembretesDoBackend();
+                    recarregarLembretes();
                 } else {
                     Toast.makeText(getContext(), "Erro ao concluir (" + response.code() + ")", Toast.LENGTH_SHORT).show();
                 }

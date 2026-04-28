@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import br.fmu.projetoasthmaspace.Core.Domain.Diario.DiarioParser;
 import br.fmu.projetoasthmaspace.Core.Domain.Lembretes.LembreteResponse;
 import br.fmu.projetoasthmaspace.Core.Domain.Lembretes.LembreteUpdateRequest;
+import br.fmu.projetoasthmaspace.Core.Util.PaginaResponse;
 import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.Data.Service.Client.ApiClient;
 import br.fmu.projetoasthmaspace.Data.Service.Client.ApiService;
@@ -42,6 +43,12 @@ public class TarefasActivity extends Fragment {
     private TarefasAdapter adapter;
     private List<LembreteResponse> tarefasHoje = new ArrayList<>();
     private List<LembreteResponse> tarefasConcluidasHoje = new ArrayList<>();
+
+    // Variáveis de controle — adiciona no topo da classe
+    private int paginaAtual = 0;
+    private boolean carregando = false;
+    private boolean ultimaPagina = false;
+    private List<LembreteResponse> todosLembretes = new ArrayList<>();
 
     @Nullable
     @Override
@@ -68,46 +75,54 @@ public class TarefasActivity extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        carregarLembretesDoBackend();
+//        carregarLembretesDoBackend();
+        recarregarLembretes();
     }
 
+    // Substitui carregarLembretesDoBackend()
     private void carregarLembretesDoBackend() {
+        if (carregando || ultimaPagina) return;
+        carregando = true;
 
-        Log.d("TAREFAS", "Chamando API listarLembretes()...");
+        Log.d("TAREFAS", "Carregando página " + paginaAtual);
 
-        api.listarLembretes().enqueue(new Callback<List<LembreteResponse>>() {
+        api.listarLembretes(paginaAtual, 20).enqueue(new Callback<PaginaResponse<LembreteResponse>>() {
             @Override
-            public void onResponse(Call<List<LembreteResponse>> call, Response<List<LembreteResponse>> response) {
-
-                Log.d("TAREFAS", "Resposta recebida. Sucesso? " + response.isSuccessful());
-
+            public void onResponse(Call<PaginaResponse<LembreteResponse>> call,
+                                   Response<PaginaResponse<LembreteResponse>> response) {
                 if (!isAdded() || binding == null) return;
+                carregando = false;
 
                 if (response.isSuccessful() && response.body() != null) {
+                    PaginaResponse<LembreteResponse> pagina = response.body();
 
-                    List<LembreteResponse> lista = response.body();
+                    todosLembretes.addAll(pagina.getContent());
+                    ultimaPagina = pagina.isLast();
+                    paginaAtual++;
 
-                    Log.d("TAREFAS", "Total de lembretes recebidos: " + lista.size());
+                    Log.d("TAREFAS", "Página " + pagina.getNumber() + " carregada. Total acumulado: " + todosLembretes.size());
 
-                    for (LembreteResponse l : lista) {
-                        Log.d("TAREFAS", "ITEM -> id=" + l.id +
-                                " data=" + l.data +
-                                " horario=" + l.horario +
-                                " concluído=" + l.concluido);
-                    }
-
-                    filtrarTarefasDeHoje(lista);
-
+                    filtrarTarefasDeHoje(todosLembretes);
                 } else {
                     Log.e("TAREFAS", "Erro HTTP: " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(Call<List<LembreteResponse>> call, Throwable t) {
+            public void onFailure(Call<PaginaResponse<LembreteResponse>> call, Throwable t) {
+                carregando = false;
                 Log.e("TAREFAS", "Falha na requisição: " + t.getMessage());
             }
         });
+    }
+
+    // Adiciona esse método para resetar após marcar/desmarcar concluído
+    private void recarregarLembretes() {
+        paginaAtual = 0;
+        ultimaPagina = false;
+        carregando = false;
+        todosLembretes = new ArrayList<>();
+        carregarLembretesDoBackend();
     }
 
     private void filtrarTarefasDeHoje(List<LembreteResponse> lista) {

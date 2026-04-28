@@ -7,6 +7,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+//        EdgeToEdge.enable(this);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -95,14 +97,15 @@ public class MainActivity extends AppCompatActivity {
             preencherLembretesExemplo();
         }
 
-        Toolbar toolbar = binding.toolbar;
-        setSupportActionBar(toolbar);
-
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-        }
+//        Toolbar toolbar = binding.toolbar;
+//        setSupportActionBar(toolbar);
+//
+//        if (getSupportActionBar() != null) {
+//            getSupportActionBar().setDisplayShowTitleEnabled(false);
+//        }
 
         binding.toolbarPerfilContainer.setOnClickListener(v -> {
+            Log.d("MainActivity", "perfil clicado");
             replacefragment(new PerfilActivity());
             binding.bottomNavigationView.getMenu().setGroupCheckable(0, true, false);
             for (int i = 0; i < binding.bottomNavigationView.getMenu().size(); i++) {
@@ -129,55 +132,59 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+//            return insets;
+//        });
 
+        configurarImmersiveMode();
         carregarNomeUsuario();
         criarCanal();
 //        WorkManager.getInstance(this).enqueue(
 //                new androidx.work.OneTimeWorkRequest.Builder(QualidadeArWorker.class).build()
 //        );
         NotificacaoScheduler.agendarVerificacaoAr(this);
+
+
     }
 
     private void carregarNomeUsuario() {
-
         UserSessionManager session = new UserSessionManager(this);
         String nomeCompleto = session.getNome();
         String token = session.getToken();
+        Log.d("MainActivity", "getNome retornou: " + nomeCompleto);
 
         if (nomeCompleto != null && !nomeCompleto.trim().isEmpty()) {
-
             String primeiroNome = nomeCompleto.split(" ")[0];
             binding.toolbarUserName.setText("Olá, " + primeiroNome);
             binding.toolbarUserName.setVisibility(View.VISIBLE);
 
-        } else if (token != null) {
-
-            UserServiceHelper.buscarNomeUsuario(
-                    this,
-                    token,
-                    new UserServiceHelper.NomeCallback() {
-
-                        @Override
-                        public void onSuccess(String nome) {
-
-                            session.saveNome(nome);
-
+        }  else if (token != null) {
+        UserServiceHelper.buscarNomeUsuario(
+                this,
+                new UserServiceHelper.NomeCallback() {
+                    @Override
+                    public void onSuccess(String nome) {
+                        Log.d("MainActivity", "buscarNome onSuccess: " + nome);
+                        session.saveNome(nome);
+                        runOnUiThread(() -> {
                             String primeiroNome = nome.split(" ")[0];
                             binding.toolbarUserName.setText("Olá, " + primeiroNome);
                             binding.toolbarUserName.setVisibility(View.VISIBLE);
-                        }
+                        });
+                    }
 
-                        @Override
-                        public void onError(String erro) {
-                            binding.toolbarUserName.setVisibility(View.GONE);
-                        }
-                    });
-        }
+                    @Override
+                    public void onError(String erro) {
+                        Log.e("MainActivity", "buscarNome onError: " + erro);
+                        runOnUiThread(() ->
+                                binding.toolbarUserName.setVisibility(View.GONE)
+                        );
+                    }
+                });
+    }
+
     }
 
     private void preencherLembretesExemplo() {
@@ -224,6 +231,24 @@ public class MainActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+    private void configurarImmersiveMode() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Android 11+
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                controller.hide(WindowInsets.Type.navigationBars());
+                controller.setSystemBarsBehavior(
+                        WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                );
+            }
+        } else {
+            // Android 10 e abaixo
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            );
+        }
     }
 
 

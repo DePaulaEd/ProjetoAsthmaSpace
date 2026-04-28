@@ -52,7 +52,10 @@
 
         <activity android:name=".Presentation.ActivityView.InformacoesPessoaisActivity" android:exported="false" />
 
-        <activity android:name=".ActivityView.EditarInformacoes" android:exported="false" />
+
+        <activity
+            android:name=".Presentation.ActivityView.EsqueceuSenhaActivity"
+            android:windowSoftInputMode="adjustResize" />
 
 
 

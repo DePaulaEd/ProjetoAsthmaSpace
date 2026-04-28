@@ -17,42 +17,30 @@ public class UserServiceHelper {
         void onError(String erro);
     }
 
-    public static void buscarNomeUsuario(
-            Context context,
-            String token,
-            NomeCallback callback) {
+    // UserServiceHelper.java completo corrigido:
+    public static void buscarNomeUsuario(Context context, NomeCallback callback) {
 
         ApiService api = ApiClient.getApiService(context);
 
-        api.getMeuPerfil("Bearer " + token)
-                .enqueue(new Callback<DadosDetalhamentoCliente>() {
+        api.getMeuPerfil().enqueue(new Callback<DadosDetalhamentoCliente>() {
 
-                    @Override
-                    public void onResponse(Call<DadosDetalhamentoCliente> call,
-                                           Response<DadosDetalhamentoCliente> response) {
+            @Override
+            public void onResponse(Call<DadosDetalhamentoCliente> call,
+                                   Response<DadosDetalhamentoCliente> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String nome = response.body().getNome();
+                    new UserSessionManager(context).saveNome(nome);
+                    callback.onSuccess(nome);
+                } else {
+                    callback.onError("Erro ao buscar perfil. Código: " + response.code());
+                }
+            }
 
-                        if (response.isSuccessful() && response.body() != null) {
-
-                            String nome = response.body().getNome();
-
-                            // Salva na sessão
-                            UserSessionManager session =
-                                    new UserSessionManager(context);
-
-                            session.saveNome(nome);
-
-                            callback.onSuccess(nome);
-
-                        } else {
-                            callback.onError("Erro ao buscar perfil.");
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<DadosDetalhamentoCliente> call, Throwable t) {
-                        Log.e("USER_HELPER", t.getMessage());
-                        callback.onError(t.getMessage());
-                    }
-                });
+            @Override
+            public void onFailure(Call<DadosDetalhamentoCliente> call, Throwable t) {
+                Log.e("USER_HELPER", "Falha: " + t.getMessage());
+                callback.onError(t.getMessage());
+            }
+        });
     }
 }

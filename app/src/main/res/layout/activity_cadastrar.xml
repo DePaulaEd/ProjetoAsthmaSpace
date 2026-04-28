@@ -44,6 +44,21 @@
             android:paddingTop="35dp"
             android:paddingBottom="35dp">
 
+            <ImageButton
+                android:id="@+id/btn_voltar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/btn_voltar_background"
+                android:contentDescription="Voltar"
+                android:padding="12dp"
+                android:src="@drawable/ic_arrow_back"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="#4FC3F7" />
+
+
             <ImageView
                 android:id="@+id/imglogo"
                 android:layout_width="wrap_content"
@@ -147,7 +162,7 @@
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Criar Senha *"
+                android:text="Criar Senha*"
                 android:textColor="@color/white"
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -175,7 +190,7 @@
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="CPF *"
+                android:text="CPF "
                 android:textColor="@color/white"
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -203,7 +218,7 @@
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Telefone *"
+                android:text="Telefone"
                 android:textColor="@color/white"
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -227,11 +242,11 @@
                 app:layout_constraintTop_toBottomOf="@id/textTelefone" />
 
             <TextView
-                android:id="@+id/textIdade"
+                android:id="@+id/textDataNascimento"
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Idade *"
+                android:text="Data de Nascimento *"
                 android:textColor="@color/white"
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -239,20 +254,21 @@
                 app:layout_constraintTop_toBottomOf="@id/editTextTelefone" />
 
             <EditText
-                android:id="@+id/editTextIdade"
+                android:id="@+id/editTextDataNascimento"
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:background="@drawable/text_box"
-                android:ems="10"
-                android:hint="00"
+                android:hint="DD/MM/AAAA"
                 android:inputType="number"
+                android:maxLength="10"
                 android:padding="10dp"
+                android:textColor="@color/white"
                 android:textColorHint="@color/white"
                 android:textSize="12dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textIdade" />
+                app:layout_constraintTop_toBottomOf="@id/textDataNascimento" />
 
             <TextView
                 android:id="@+id/textSexo"
@@ -264,7 +280,7 @@
                 android:textSize="13dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/editTextIdade" />
+                app:layout_constraintTop_toBottomOf="@id/editTextDataNascimento" />
 
             <Spinner
                 android:id="@+id/spinnerSexo"
