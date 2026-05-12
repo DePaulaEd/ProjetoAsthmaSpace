@@ -7,29 +7,21 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowInsets;
-import android.view.WindowInsetsController;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.work.WorkManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import br.fmu.projetoasthmaspace.Core.Navegation.NavegacaoCallback;
 import br.fmu.projetoasthmaspace.Core.Session.UserServiceHelper;
 import br.fmu.projetoasthmaspace.Core.Domain.Cliente.DadosDetalhamentoCliente;
 import br.fmu.projetoasthmaspace.Data.worker.NotificacaoScheduler;
-import br.fmu.projetoasthmaspace.Data.worker.QualidadeArWorker;
 import br.fmu.projetoasthmaspace.Core.Session.UserSessionManager;
 import br.fmu.projetoasthmaspace.Presentation.Fragment.DiarioSintomasFragment;
 import br.fmu.projetoasthmaspace.Presentation.Fragment.EducativoFragment;
@@ -40,7 +32,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavegacaoCallback {
 
     ActivityMainBinding binding;
 
@@ -65,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        EdgeToEdge.enable(this);
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -97,12 +89,7 @@ public class MainActivity extends AppCompatActivity {
             preencherLembretesExemplo();
         }
 
-//        Toolbar toolbar = binding.toolbar;
-//        setSupportActionBar(toolbar);
-//
-//        if (getSupportActionBar() != null) {
-//            getSupportActionBar().setDisplayShowTitleEnabled(false);
-//        }
+
 
         binding.toolbarPerfilContainer.setOnClickListener(v -> {
             Log.d("MainActivity", "perfil clicado");
@@ -114,12 +101,13 @@ public class MainActivity extends AppCompatActivity {
             binding.bottomNavigationView.getMenu().setGroupCheckable(0, true, true);
         });
 
-        replacefragment(new TelaInicialActivity());
+        replacefragment(new TelaInicialFragment());
+//        binding.bottomNavigationView.setSelectedItemId(R.id.navigation_home);
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.navigation_home) {
-                replacefragment(new TelaInicialActivity());
+                replacefragment(new TelaInicialFragment());
             } else if (itemId == R.id.navigation_lembretes) {
                 replacefragment(new LembretesActivity());
             } else if (itemId == R.id.navigation_tarefas) {
@@ -132,19 +120,13 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-//            return insets;
-//        });
 
-        configurarImmersiveMode();
+
         carregarNomeUsuario();
-        criarCanal();
+
 //        WorkManager.getInstance(this).enqueue(
 //                new androidx.work.OneTimeWorkRequest.Builder(QualidadeArWorker.class).build()
 //        );
-        NotificacaoScheduler.agendarVerificacaoAr(this);
 
 
     }
@@ -213,18 +195,18 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.replace(R.id.frameLayout, fragment);
         fragmentTransaction.commit();
     }
-    private void criarCanal() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel canal = new NotificationChannel(
-                    "LEMBRETES",
-                    "Lembretes do App",
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(canal);
-        }
-    }
+//    private void criarCanal() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            NotificationChannel canal = new NotificationChannel(
+//                    "LEMBRETES",
+//                    "Lembretes do App",
+//                    NotificationManager.IMPORTANCE_HIGH
+//            );
+//
+//            NotificationManager manager = getSystemService(NotificationManager.class);
+//            manager.createNotificationChannel(canal);
+//        }
+//    }
 
     private void redirecionarParaLogin() {
         Intent intent = new Intent(this, LoginActivity.class);
@@ -232,24 +214,17 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
-    private void configurarImmersiveMode() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Android 11+
-            WindowInsetsController controller = getWindow().getInsetsController();
-            if (controller != null) {
-                controller.hide(WindowInsets.Type.navigationBars());
-                controller.setSystemBarsBehavior(
-                        WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                );
-            }
-        } else {
-            // Android 10 e abaixo
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            );
-        }
+
+    public interface NavegacaoCallback {
+        void navegarParaEducativo();
     }
+
+    @Override
+    public void navegarParaEducativo() {
+        replacefragment(new EducativoFragment());
+        binding.bottomNavigationView.setSelectedItemId(R.id.navigation_educativo);
+    }
+
 
 
 

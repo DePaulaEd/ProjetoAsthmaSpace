@@ -1,6 +1,7 @@
 package br.fmu.projetoasthmaspace.Presentation.ActivityView;
 
 import android.content.Intent;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,6 +27,14 @@ import br.fmu.projetoasthmaspace.Presentation.Fragment.DiarioSintomasFragment;
 import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.databinding.ActivityPerfilBinding;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
+
 public class PerfilActivity extends Fragment {
 
     private ActivityPerfilBinding binding;
@@ -42,11 +51,9 @@ public class PerfilActivity extends Fragment {
 
     private void salvarFotoLocalmente(Uri uri) {
         try {
-            // Cria o arquivo de destino no armazenamento interno do app
             File diretorio = requireContext().getFilesDir();
             File arquivoFoto = new File(diretorio, "foto_perfil.jpg");
 
-            // Copia os bytes da Uri para o arquivo interno
             InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
             FileOutputStream outputStream = new FileOutputStream(arquivoFoto);
             byte[] buffer = new byte[4096];
@@ -57,16 +64,53 @@ public class PerfilActivity extends Fragment {
             inputStream.close();
             outputStream.close();
 
-            // Salva o caminho na sessão
-            new UserSessionManager(requireContext()).saveFotoPath(arquivoFoto.getAbsolutePath());
+            // Lê e corrige a rotação EXIF
+            Bitmap corrigido = corrigirRotacao(arquivoFoto.getAbsolutePath());
 
-            // Exibe a foto
-            binding.imgPerfil.setImageURI(Uri.fromFile(arquivoFoto));
+            // Salva novamente já corrigido
+            FileOutputStream fos = new FileOutputStream(arquivoFoto);
+            corrigido.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+            fos.close();
+
+            new UserSessionManager(requireContext()).saveFotoPath(arquivoFoto.getAbsolutePath());
+            exibirFotoCircular(Uri.fromFile(arquivoFoto));
 
         } catch (Exception e) {
             Log.e("PERFIL", "Erro ao salvar foto: " + e.getMessage());
             Toast.makeText(requireContext(), "Erro ao salvar foto", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private Bitmap corrigirRotacao(String path) throws Exception {
+        Bitmap bitmap = BitmapFactory.decodeFile(path);
+        ExifInterface exif = new ExifInterface(path);
+
+        int orientacao = exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+        );
+
+        int graus;
+        switch (orientacao) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                graus = 90;
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                graus = 180;
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                graus = 270;
+                break;
+            default:
+                graus = 0;
+                break;
+        }
+
+        if (graus == 0) return bitmap;
+
+        android.graphics.Matrix matrix = new android.graphics.Matrix();
+        matrix.postRotate(graus);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
     private void carregarFotoPerfil() {
@@ -184,6 +228,29 @@ public class PerfilActivity extends Fragment {
                     });
 
         }
+    }
+
+    private void exibirFotoCircular(Uri uri) {
+        try {
+            InputStream is = requireContext().getContentResolver().openInputStream(uri);
+            Bitmap original = BitmapFactory.decodeStream(is);
+            binding.imgPerfil.setImageDrawable(new BitmapDrawable(getResources(), recortarCirculo(original)));
+        } catch (Exception e) {
+            Log.e("PERFIL", "Erro ao exibir foto circular: " + e.getMessage());
+        }
+    }
+
+    private Bitmap recortarCirculo(Bitmap bitmap) {
+        int tamanho = Math.min(bitmap.getWidth(), bitmap.getHeight());
+        Bitmap saida = Bitmap.createBitmap(tamanho, tamanho, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(saida);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setShader(new BitmapShader(
+                Bitmap.createScaledBitmap(bitmap, tamanho, tamanho, true),
+                Shader.TileMode.CLAMP, Shader.TileMode.CLAMP
+        ));
+        canvas.drawCircle(tamanho / 2f, tamanho / 2f, tamanho / 2f, paint);
+        return saida;
     }
 
     @Override

@@ -329,35 +329,68 @@ public class LembretesActivity extends Fragment {
     private void showLembreteDialog(@Nullable final Lembrete lembreteExistente) {
         final boolean isEditing = lembreteExistente != null;
 
-        // Data selecionada — começa com hoje ou com a data do lembrete
+        final int[] horaSelecionada    = {Calendar.getInstance().get(Calendar.HOUR_OF_DAY)};
+        final int[] minutoSelecionado  = {Calendar.getInstance().get(Calendar.MINUTE)};
         final String[] dataSelecionada = {
                 isEditing ? lembreteExistente.getData() : parseDateFormat.format(new Date())
         };
 
+        View dialogView = LayoutInflater.from(getContext())
+                .inflate(R.layout.dialog_novo_lembrete, null);
 
-        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_novo_lembrete, null);
-        final EditText tituloInput = dialogView.findViewById(R.id.edit_text_titulo_lembrete);
-        final EditText horarioInput = dialogView.findViewById(R.id.edit_text_horario_lembrete);
+        EditText tituloInput         = dialogView.findViewById(R.id.edit_text_titulo_lembrete);
+        TextView textHorario         = dialogView.findViewById(R.id.text_horario_selecionado);
+        TextView textData            = dialogView.findViewById(R.id.text_data_selecionada);
+        LinearLayout btnHorario      = dialogView.findViewById(R.id.btn_selecionar_horario);
+        LinearLayout btnData         = dialogView.findViewById(R.id.btn_selecionar_data);
 
-        TextView btnSelecionarData = new TextView(getContext());
-        btnSelecionarData.setPadding(0, 8, 0, 8);
-        btnSelecionarData.setTextColor(Color.parseColor("#4FC3F7"));
-        btnSelecionarData.setTextSize(14f);
-        btnSelecionarData.setText("📅 Data: " + formatarDataParaExibicao(dataSelecionada[0]));
-        btnSelecionarData.setOnClickListener(v -> {
+        // Preenche se for edição
+        if (isEditing) {
+            tituloInput.setText(lembreteExistente.getTitulo());
+
+            // Horário
+            String h = lembreteExistente.getHorario();
+            if (h != null && h.contains(":")) {
+                String[] partes = h.split(":");
+                horaSelecionada[0]   = Integer.parseInt(partes[0]);
+                minutoSelecionado[0] = Integer.parseInt(partes[1].substring(0, 2));
+            }
+            textHorario.setText(String.format("%02d:%02d", horaSelecionada[0], minutoSelecionado[0]));
+            textHorario.setTextColor(Color.WHITE);
+
+            // Data
+            textData.setText(formatarDataParaExibicao(dataSelecionada[0]));
+            textData.setTextColor(Color.WHITE);
+        }
+
+        // Toque no horário → abre relógio
+        btnHorario.setOnClickListener(v ->
+                new android.app.TimePickerDialog(getContext(),
+                        (view, hora, minuto) -> {
+                            horaSelecionada[0]   = hora;
+                            minutoSelecionado[0] = minuto;
+                            textHorario.setText(String.format("%02d:%02d", hora, minuto));
+                            textHorario.setTextColor(Color.WHITE);
+                        },
+                        horaSelecionada[0], minutoSelecionado[0], true
+                ).show()
+        );
+
+        // Toque na data → abre calendário
+        btnData.setOnClickListener(v -> {
             Calendar cal = Calendar.getInstance();
             try {
                 Date d = parseDateFormat.parse(dataSelecionada[0]);
                 cal.setTime(d);
             } catch (ParseException ignored) {}
 
-            new DatePickerDialog(
-                    requireContext(),
-                    (picker, year, month, dayOfMonth) -> {
-                        Calendar selecionado = Calendar.getInstance();
-                        selecionado.set(year, month, dayOfMonth);
-                        dataSelecionada[0] = parseDateFormat.format(selecionado.getTime());
-                        btnSelecionarData.setText("📅 Data: " + formatarDataParaExibicao(dataSelecionada[0]));
+            new DatePickerDialog(requireContext(),
+                    (view, ano, mes, dia) -> {
+                        Calendar sel = Calendar.getInstance();
+                        sel.set(ano, mes, dia);
+                        dataSelecionada[0] = parseDateFormat.format(sel.getTime());
+                        textData.setText(formatarDataParaExibicao(dataSelecionada[0]));
+                        textData.setTextColor(Color.WHITE);
                     },
                     cal.get(Calendar.YEAR),
                     cal.get(Calendar.MONTH),
@@ -365,55 +398,42 @@ public class LembretesActivity extends Fragment {
             ).show();
         });
 
-
-        if (dialogView instanceof ViewGroup) {
-            ((ViewGroup) dialogView).addView(btnSelecionarData, 0);
-        }
-
-        if (isEditing) {
-            tituloInput.setText(lembreteExistente.getTitulo());
-            horarioInput.setText(lembreteExistente.getHorario());
-        }
-
-        // Cria o dialog com visual customizado
         AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.DialogTheme)
                 .setTitle(isEditing ? "Editar Lembrete" : "Novo Lembrete")
                 .setView(dialogView)
-                .setPositiveButton("Salvar", null) // null para controlar o dismiss manualmente
+                .setPositiveButton("Salvar", null)
                 .setNegativeButton("Cancelar", (d, id) -> d.dismiss())
                 .create();
 
-
         dialog.setOnShowListener(d -> {
-            // Cor do botão positivo
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#4FC3F7"));
-            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#8EADD4"));
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                    .setTextColor(Color.parseColor("#4FC3F7"));
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                    .setTextColor(Color.parseColor("#8EADD4"));
 
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
                 String titulo = tituloInput.getText().toString().trim();
-                String horario = horarioInput.getText().toString().trim();
 
-                if (titulo.isEmpty() || horario.isEmpty()) {
-                    Toast.makeText(getContext(), "Preencha todos os campos.", Toast.LENGTH_SHORT).show();
+                if (titulo.isEmpty()) {
+                    Toast.makeText(getContext(), "Informe o título.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (textHorario.getTextColors().getDefaultColor() ==
+                        getResources().getColor(R.color.label_color, null)) {
+                    Toast.makeText(getContext(), "Selecione o horário.", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                try {
-                    String[] partes = horario.split(":");
-                    int hora = Integer.parseInt(partes[0]);
-                    int minuto = Integer.parseInt(partes[1]);
+                String horarioFormatado = String.format("%02d:%02d:00",
+                        horaSelecionada[0], minutoSelecionado[0]);
 
-                    if (isEditing) {
-                        atualizarLembrete(lembreteExistente, titulo, horario, dataSelecionada[0]);
-                    } else {
-                        LembreteRequest req = new LembreteRequest(titulo, dataSelecionada[0], horario);
-                        registrarLembrete(req, hora, minuto, titulo);
-                    }
-                    dialog.dismiss();
-
-                } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                    Toast.makeText(getContext(), "Formato inválido. Use HH:mm", Toast.LENGTH_SHORT).show();
+                if (isEditing) {
+                    atualizarLembrete(lembreteExistente, titulo, horarioFormatado, dataSelecionada[0]);
+                } else {
+                    LembreteRequest req = new LembreteRequest(titulo, dataSelecionada[0], horarioFormatado);
+                    registrarLembrete(req, horaSelecionada[0], minutoSelecionado[0], titulo);
                 }
+                dialog.dismiss();
             });
         });
 

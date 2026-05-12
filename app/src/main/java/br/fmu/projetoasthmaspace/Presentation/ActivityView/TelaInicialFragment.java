@@ -18,8 +18,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -29,6 +27,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.fmu.projetoasthmaspace.Core.Navegation.NavegacaoCallback;
 import br.fmu.projetoasthmaspace.Core.Util.AirQualityUtils;
 import br.fmu.projetoasthmaspace.Presentation.Adapter.PoluenteAdapter;
 import br.fmu.projetoasthmaspace.Presentation.Fragment.EducativoFragment;
@@ -41,7 +40,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class TelaInicialActivity extends Fragment {
+public class TelaInicialFragment extends Fragment {
 
     private static final String TAG = "TelaInicial";
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
@@ -98,11 +97,9 @@ public class TelaInicialActivity extends Fragment {
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(@NonNull View widget) {
-                FragmentManager fm = getParentFragmentManager();
-                FragmentTransaction ft = fm.beginTransaction();
-                ft.replace(R.id.frameLayout, new EducativoFragment());
-                ft.addToBackStack(null);
-                ft.commit();
+                if (getActivity() instanceof NavegacaoCallback) {
+                    ((NavegacaoCallback) getActivity()).navegarParaEducativo();
+                }
             }
         };
 

@@ -17,7 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.databinding.ActivityCadastrarBinding;
 
-public class CadastrarActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class CadastrarActivity extends BaseActivity  implements AdapterView.OnItemSelectedListener {
 
     private ActivityCadastrarBinding binding;
 

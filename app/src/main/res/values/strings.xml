@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Projeto Asthma Space</string>
+    <string name="app_name">Asthma Space</string>
     <string-array name="spinner_sexo">
         <item>Selecione</item>
         <item>Masculino</item>

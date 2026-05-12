@@ -19,7 +19,7 @@ import br.fmu.projetoasthmaspace.Data.Local.NotificacaoDatabase;
 import br.fmu.projetoasthmaspace.Data.Local.NotificacaoEntity;
 import br.fmu.projetoasthmaspace.R;
 
-public class NotificacoesActivity extends AppCompatActivity {
+public class NotificacoesActivity extends BaseActivity  {
 
     private LinearLayout containerNotificacoes;
     private TextView txtVazio;
@@ -96,20 +96,13 @@ public class NotificacoesActivity extends AppCompatActivity {
             item.setAlpha(notif.lida ? 0.6f : 1.0f);
 
             btnLida.setImageResource(notif.lida
-                    ? android.R.drawable.checkbox_on_background
-                    : android.R.drawable.checkbox_off_background);
-            btnLida.setColorFilter(
-                    notif.lida
-                            ? getResources().getColor(R.color.green_dark, getTheme())
-                            : android.graphics.Color.parseColor("#4FC3F7"),
-                    android.graphics.PorterDuff.Mode.SRC_IN);
+                    ? R.drawable.ic_check_circle_filled
+                    : R.drawable.ic_check_circle_outline);
+            btnLida.clearColorFilter(); // cor já está definida no vetor, não precisa de colorFilter
 
             btnLida.setOnClickListener(v -> {
                 if (!notif.lida) {
-                    btnLida.setImageResource(android.R.drawable.checkbox_on_background);
-                    btnLida.setColorFilter(
-                            getResources().getColor(R.color.green_dark, getTheme()),
-                            android.graphics.PorterDuff.Mode.SRC_IN);
+                    btnLida.setImageResource(R.drawable.ic_check_circle_filled);
                     btnLida.setEnabled(false);
                     btnLida.postDelayed(() -> executor.execute(() -> {
                         NotificacaoDatabase.getInstance(this).dao().marcarComoLida(notif.id);
@@ -117,7 +110,6 @@ public class NotificacoesActivity extends AppCompatActivity {
                     }), 500);
                 }
             });
-
             btnDeletar.setOnClickListener(v -> {
                 btnDeletar.setColorFilter(
                         android.graphics.Color.parseColor("#EF5350"),
@@ -141,10 +133,8 @@ public class NotificacoesActivity extends AppCompatActivity {
             View item = containerNotificacoes.getChildAt(i);
             ImageView btnLida = item.findViewById(R.id.btnMarcarLida);
             if (btnLida != null) {
-                btnLida.setImageResource(android.R.drawable.checkbox_on_background);
-                btnLida.setColorFilter(
-                        getResources().getColor(R.color.green_dark, getTheme()),
-                        android.graphics.PorterDuff.Mode.SRC_IN);
+                btnLida.setImageResource(R.drawable.ic_check_circle_filled);
+                btnLida.clearColorFilter();
                 btnLida.setEnabled(false);
             }
         }

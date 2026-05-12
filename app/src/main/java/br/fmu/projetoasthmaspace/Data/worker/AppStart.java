@@ -6,7 +6,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import br.fmu.projetoasthmaspace.Presentation.ActivityView.LoginActivity;
-import br.fmu.projetoasthmaspace.Presentation.ActivityView.TelaInicialActivity;
+import br.fmu.projetoasthmaspace.Presentation.ActivityView.TelaInicialFragment;
 
 public class AppStart extends AppCompatActivity {
     @Override
@@ -21,7 +21,7 @@ public class AppStart extends AppCompatActivity {
             startActivity(new Intent(this, LoginActivity.class));
         } else {
             // Usuário logado → vai para tela inicial
-            startActivity(new Intent(this, TelaInicialActivity.class));
+            startActivity(new Intent(this, TelaInicialFragment.class));
         }
 
         finish();

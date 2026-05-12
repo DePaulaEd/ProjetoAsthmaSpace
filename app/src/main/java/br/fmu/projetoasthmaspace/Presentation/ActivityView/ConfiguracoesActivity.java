@@ -10,7 +10,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+
 import androidx.work.WorkManager;
 
 import br.fmu.projetoasthmaspace.Core.Util.AlterarSenhaRequest;
@@ -23,7 +23,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ConfiguracoesActivity extends AppCompatActivity {
+public class ConfiguracoesActivity extends BaseActivity  {
 
     private static final String PREFS_CONFIG      = "CONFIG";
     private static final String KEY_NOTIFICACOES  = "notificacoes_ativas";
@@ -109,7 +109,9 @@ public class ConfiguracoesActivity extends AppCompatActivity {
 
     // ── ALTERAR SENHA ─────────────────────────────────────────────
     private void setupAlterarSenha() {
-        findViewById(R.id.btnAlterarSenha).setOnClickListener(v -> mostrarDialogSenha());
+        findViewById(R.id.btnAlterarSenha).setOnClickListener(v ->
+                startActivity(new Intent(this, AlterarSenhaActivity.class))
+        );
     }
 
     private void mostrarDialogSenha() {

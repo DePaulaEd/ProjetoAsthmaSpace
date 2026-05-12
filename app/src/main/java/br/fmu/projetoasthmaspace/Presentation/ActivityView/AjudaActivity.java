@@ -4,7 +4,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import br.fmu.projetoasthmaspace.databinding.ActivityAjudaBinding;
 
-public class AjudaActivity extends AppCompatActivity {
+public class AjudaActivity extends BaseActivity  {
 
     private ActivityAjudaBinding binding;
 

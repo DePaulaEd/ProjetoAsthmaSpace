@@ -23,7 +23,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class InformacoesPessoaisActivity extends AppCompatActivity {
+public class InformacoesPessoaisActivity extends BaseActivity  {
 
     private ActivityInformacoesPessoaisBinding binding;
     private ApiService api;

@@ -108,8 +108,19 @@ public class EducativoFragment extends Fragment {
         ));
 
         // Artigos Originais
-        artigos.add(new Artigo("Aonde Guardar seu Inalador", "Um guia sobre os melhores locais para armazenar seu inalador.", "...", R.drawable.img_inalador));
-        artigos.add(new Artigo("Como Limpar seu Espaçador", "Um guia passo a passo para manter seu espaçador limpo.", "...", R.drawable.img_inalador));
+        artigos.add(new Artigo("Aonde Guardar seu Inalador", "Um guia sobre os melhores locais para armazenar seu inalador.",
+                "Um guia sobre os melhores locais para armazenar seu inalador.\n\n" +
+                        "Guardar o inalador corretamente garante que ele funcione quando você precisar.\n\n" +
+                        "✅ Recomendado: temperatura ambiente (15°C–25°C), dentro de estojo na bolsa ou na cabeceira da cama.\n\n" +
+                        "❌ Evite: porta-luvas do carro (calor), banheiro (umidade) e geladeira (frio reduz eficácia).\n\n" +
+                        "\uD83D\uDCA1 Agite antes de usar e verifique sempre a validade.", R.drawable.img_inalador));
+        artigos.add(new Artigo("Como Limpar seu Espaçador",
+                "Um guia passo a passo para manter seu espaçador limpo.",
+                        "Um guia passo a passo para manter seu espaçador limpo.\n\n" +
+                        "Limpe o espaçador semanalmente para evitar acúmulo de resíduos e garantir a dose correta.\n\n" +
+                        "\uD83E\uDDFC Como limpar: desmonte, mergulhe em água morna com detergente neutro por 15 min, enxágue e seque ao ar livre. Não esfregue — cria eletrostática.\n\n" +
+                        "⚠\uFE0F Substitua a cada 6–12 meses ou se aparecerem rachaduras.\n\n" +
+                        "\uD83D\uDCA1 Após limpar, faça um jato de teste antes de usar.\n\n", R.drawable.img_inalador));
     }
 
     private void adicionarArtigo(final Artigo artigo) {

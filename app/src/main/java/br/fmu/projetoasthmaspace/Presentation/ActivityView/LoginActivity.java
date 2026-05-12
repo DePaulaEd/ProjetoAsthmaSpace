@@ -23,7 +23,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
 
     private ActivityLoginBinding binding;
     private ApiService api;
@@ -31,13 +31,20 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Verifica token antes de mostrar a tela de login
+        UserSessionManager session = new UserSessionManager(this);
+        if (session.getToken() != null && !session.getToken().isEmpty()) {
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+            return;
+        }
+
         EdgeToEdge.enable(this);
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-
         binding.btnEntrar.setOnClickListener(v -> fazerLogin());
-
 
         binding.btnCadastrar.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, CadastrarActivity.class);
@@ -55,6 +62,10 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private void setCarregando(boolean carregando) {
+        binding.btnEntrar.setEnabled(!carregando);
+        binding.btnEntrar.setText(carregando ? "Entrando..." : "Entrar");
+    }
 
     private void fazerLogin() {
         String email = binding.editTextEmail.getText().toString();
@@ -65,10 +76,10 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        setCarregando(true); // 🔒 Bloqueia o botão
+
         LoginRequest req = new LoginRequest(email, senha);
-
         api = ApiClient.getApiService(getApplicationContext());
-
 
         api.login(req).enqueue(new Callback<TokenResponse>() {
             @Override
@@ -92,23 +103,32 @@ public class LoginActivity extends AppCompatActivity {
                         public void onFailure(Call<Long> call, Throwable t) {}
                     });
 
-
                     Toast.makeText(LoginActivity.this, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show();
-
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    startActivity(intent);
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
+                    // ℹ️ Não precisa reabilitar: a Activity é destruída com finish()
 
                 } else {
-                    Toast.makeText(LoginActivity.this, "Email ou senha incorretos", Toast.LENGTH_SHORT).show();
+                    String mensagemErro = "Email ou senha incorretos";
+                    try {
+                        if (response.errorBody() != null) {
+                            String corpo = response.errorBody().string();
+                            if (corpo != null && !corpo.isEmpty()) {
+                                mensagemErro = corpo.replace("\"", "").trim();
+                            }
+                        }
+                    } catch (Exception ignored) {}
+
+                    Toast.makeText(LoginActivity.this, mensagemErro, Toast.LENGTH_LONG).show();
+                    setCarregando(false); // 🔓 Reabilita só em caso de erro
                 }
             }
 
             @Override
             public void onFailure(Call<TokenResponse> call, Throwable t) {
                 Toast.makeText(LoginActivity.this, "Erro de conexão: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                setCarregando(false); // 🔓 Reabilita em caso de falha de rede
             }
         });
     }
-
 }

@@ -24,7 +24,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class EsqueceuSenhaActivity extends AppCompatActivity {
+public class EsqueceuSenhaActivity extends BaseActivity  {
 
     private ViewFlipper viewFlipper;
     private EditText editEmailRecuperacao;

@@ -3,7 +3,9 @@ package br.fmu.projetoasthmaspace.Data.worker;
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
@@ -25,6 +27,7 @@ import java.util.Locale;
 import br.fmu.projetoasthmaspace.Data.Local.NotificacaoDatabase;
 import br.fmu.projetoasthmaspace.Data.Local.NotificacaoEntity;
 import br.fmu.projetoasthmaspace.Core.Util.AirQualityUtils;
+import br.fmu.projetoasthmaspace.Presentation.ActivityView.MainActivity;
 import br.fmu.projetoasthmaspace.R;
 import br.fmu.projetoasthmaspace.Data.Service.QualityAir.AirResponse;
 import br.fmu.projetoasthmaspace.Data.Service.QualityAir.ApiOpenWeather;
@@ -34,7 +37,6 @@ public class QualidadeArWorker extends Worker {
     private static final String TAG      = "QualidadeArWorker";
     private static final String CANAL_ID = "QUALIDADE_AR";
 
-    // Coordenadas padrão (São Paulo) — usado se GPS não disponível
     private static final double LAT_PADRAO = -23.5505;
     private static final double LON_PADRAO = -46.6333;
 
@@ -46,13 +48,11 @@ public class QualidadeArWorker extends Worker {
     @Override
     public Result doWork() {
         try {
-            // 1 — Obtém coordenadas (GPS ou padrão)
             double[] coords = obterCoordenadas();
             double lat = coords[0];
             double lon = coords[1];
             Log.d(TAG, "Coordenadas: " + lat + ", " + lon);
 
-            // 2 — Chamada síncrona usando ApiOpenWeather já existente no projeto
             retrofit2.Response<AirResponse> response = ApiOpenWeather
                     .getApiService()
                     .getAirQuality(lat, lon)
@@ -67,16 +67,13 @@ public class QualidadeArWorker extends Worker {
 
             int aqi = response.body().list.get(0).main.aqi;
 
-
             String titulo   = getTitulo(aqi);
-            String mensagem = AirQualityUtils.gerarRecomendacaoAqi(converterAqiParaUs(aqi));
-
+            String mensagem = AirQualityUtils.gerarRecomendacaoAqi(aqi);
 
             String dataHora   = new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("pt", "BR")).format(new Date());
             String dataPrefix = new SimpleDateFormat("dd/MM/yyyy",        new Locale("pt", "BR")).format(new Date());
 
             NotificacaoDatabase db = NotificacaoDatabase.getInstance(getApplicationContext());
-
 
             if (aqi >= 3 || db.dao().contarNotificacoesArNaData(dataPrefix) == 0) {
                 db.dao().inserir(new NotificacaoEntity(titulo, mensagem, dataHora, "AR"));
@@ -94,7 +91,6 @@ public class QualidadeArWorker extends Worker {
         }
     }
 
-    // Obtém última localização conhecida — Tasks.await() é seguro em Worker (background thread)
     private double[] obterCoordenadas() {
         Context ctx = getApplicationContext();
 
@@ -112,9 +108,7 @@ public class QualidadeArWorker extends Worker {
         try {
             FusedLocationProviderClient client =
                     LocationServices.getFusedLocationProviderClient(ctx);
-
             android.location.Location location = Tasks.await(client.getLastLocation());
-
             if (location != null) {
                 return new double[]{location.getLatitude(), location.getLongitude()};
             }
@@ -126,18 +120,6 @@ public class QualidadeArWorker extends Worker {
         return new double[]{LAT_PADRAO, LON_PADRAO};
     }
 
-    // Converte escala OpenWeatherMap (1-5) para US AQI (0-300+)
-    // necessário porque AirQualityUtils.gerarRecomendacaoAqi() usa escala US
-    private int converterAqiParaUs(int aqiOw) {
-        switch (aqiOw) {
-            case 1:  return 25;   // Bom
-            case 2:  return 75;   // Razoável
-            case 3:  return 125;  // Moderado
-            case 4:  return 175;  // Ruim
-            default: return 250;  // Muito Ruim
-        }
-    }
-
     private String getTitulo(int aqi) {
         String[] emojis = {"", "🟢", "🟡", "🟠", "🔴", "🟣"};
         String emoji = (aqi >= 1 && aqi <= 5) ? emojis[aqi] : "🔵";
@@ -145,23 +127,37 @@ public class QualidadeArWorker extends Worker {
     }
 
     private void dispararNotificacaoSistema(String titulo, String mensagem) {
-        NotificationManager manager = (NotificationManager)
-                getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        Context ctx = getApplicationContext();
+        NotificationManager manager =
+                (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 
+        // Cria canal (seguro chamar repetidamente — SO ignora se já existe)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel canal = new NotificationChannel(
                     CANAL_ID, "Qualidade do Ar", NotificationManager.IMPORTANCE_HIGH);
             manager.createNotificationChannel(canal);
         }
 
+        // ✅ PendingIntent → abre MainActivity ao clicar na notificação
+        Intent intent = new Intent(ctx, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        int flagsPending = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            flagsPending |= PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 0, intent, flagsPending);
+
         NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(getApplicationContext(), CANAL_ID)
+                new NotificationCompat.Builder(ctx, CANAL_ID)
                         .setSmallIcon(R.drawable.ic_launcher_foreground)
                         .setContentTitle(titulo)
                         .setContentText(mensagem)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(mensagem))
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        .setAutoCancel(true);
+                        .setContentIntent(pendingIntent)  // ✅ clique redireciona
+                        .setAutoCancel(true);             // ✅ fecha ao clicar
 
         manager.notify((int) System.currentTimeMillis(), builder.build());
     }

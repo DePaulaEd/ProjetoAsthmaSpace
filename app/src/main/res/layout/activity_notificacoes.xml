@@ -43,9 +43,8 @@
             android:id="@+id/btnMarcarTodas"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:src="@android:drawable/checkbox_on_background"
-            android:backgroundTint="#162040"
-            app:tint="#4FC3F7"
+            android:src="@drawable/ic_check_all"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Marcar todas como lidas"
             android:scaleType="fitCenter"
             android:padding="6dp" />

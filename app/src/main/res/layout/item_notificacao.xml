@@ -75,9 +75,13 @@
                 android:id="@+id/btnMarcarLida"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@android:drawable/checkbox_off_background"
+                android:src="@drawable/ic_check_circle_outline"
                 android:layout_marginEnd="16dp"
-                android:padding="4dp" />
+                android:padding="4dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Marcar como lida" />
 
             <ImageView
                 android:id="@+id/btnDeletarNotif"
