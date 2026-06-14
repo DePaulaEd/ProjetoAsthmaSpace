@@ -74,9 +74,10 @@ public class AirQualityUtils {
     }
 
     public static String statusCo(double v) {
-        if (v <= 4) return "Bom";
-        if (v <= 9) return "Moderado";
-        return "Ruim";
+        if (v <= 4400)  return "Bom";
+        if (v <= 9400)  return "Moderado";
+        if (v <= 12400) return "Ruim";
+        return "Muito Ruim";
     }
 
     public static String statusPm25(double v) {

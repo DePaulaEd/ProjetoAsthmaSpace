@@ -5,8 +5,10 @@ import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -164,6 +166,9 @@ public class LembretesActivity extends Fragment {
                     dadosCarregados = true;
                     listaDeInstancias.clear();
                     listaDeInstancias.addAll(response.body());
+
+                    migrarLembretesAntigos(response.body()); // ← Migra lembretes antigos para o novo formato
+
                     atualizarPainelDeResumo();
                     atualizarTextoBotaoFiltro();
                     renderizarLista();
@@ -189,11 +194,12 @@ public class LembretesActivity extends Fragment {
             @Override
             public void onResponse(Call<LembreteTemplate> call, Response<LembreteTemplate> response) {
                 if (!isAdded()) return;
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
+                    LembreteTemplate criado = response.body();
                     Toast.makeText(getContext(), "Lembrete salvo!", Toast.LENGTH_SHORT).show();
-                    LocationHelper.obterLocalizacao(requireContext(),
-                            (lat, lon) -> agendarLembrete(hora, minuto, req.dataInicio,
-                                    titulo, "Lembrete programado!", req.tipoRecorrencia));
+                    // ✅ Fora do callback de localização — templateId disponível
+                    agendarLembrete(hora, minuto, req.dataInicio, titulo,
+                            "Lembrete programado!", req.tipoRecorrencia, criado.id);
                     dadosCarregados = false;
                     carregarInstanciasPorPeriodo();
                 } else {
@@ -769,7 +775,8 @@ public class LembretesActivity extends Fragment {
     }
 
     private void agendarLembrete(int hora, int minuto, String dataStr,
-                                 String titulo, String mensagem, String tipoRecorrencia) {
+                                 String titulo, String mensagem,
+                                 String tipoRecorrencia, long templateId) {
         Calendar c = Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo"));
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -794,15 +801,17 @@ public class LembretesActivity extends Fragment {
             }
         }
 
+        // ✅ requestCode = templateId (estável, único, sem colisão)
+        int requestCode = (int) templateId;
+
         Intent intent = new Intent(getContext(), LembreteReceiver.class);
         intent.putExtra("titulo", titulo);
         intent.putExtra("mensagem", mensagem);
         intent.putExtra("hora", hora);
         intent.putExtra("minuto", minuto);
         intent.putExtra("recorrencia", tipoRecorrencia);
-
-        int requestCode = Math.abs((titulo + hora + minuto).hashCode());
         intent.putExtra("requestCode", requestCode);
+        intent.putExtra("templateId", templateId); // ✅ passado explicitamente
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 getContext(), requestCode, intent,
@@ -812,9 +821,21 @@ public class LembretesActivity extends Fragment {
                 (AlarmManager) requireActivity().getSystemService(Context.ALARM_SERVICE);
         if (alarmManager == null) return;
 
-        Log.d("Lembretes", "Agendando '" + titulo + "' para " + c.getTime() + " [" + tipoRecorrencia + "]");
+        // ✅ Salva no SharedPreferences para sobreviver a reboot
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        sdf.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+        String dataAgendada = sdf.format(c.getTime());
+        SharedPreferences prefs = requireContext()
+                .getSharedPreferences("lembretes_reboot", Context.MODE_PRIVATE);
+        // formato: titulo|mensagem|hora|minuto|recorrencia|data|templateId
+        String valor = titulo + "|" + mensagem + "|" + hora + "|" + minuto
+                + "|" + tipoRecorrencia + "|" + dataAgendada + "|" + templateId;
+        prefs.edit().putString("lembrete_" + requestCode, valor).apply();
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+        Log.d("Lembretes", "Agendando '" + titulo + "' para " + c.getTime()
+                + " [" + tipoRecorrencia + "] requestCode=" + requestCode);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (alarmManager.canScheduleExactAlarms()) {
                 alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
@@ -825,6 +846,65 @@ public class LembretesActivity extends Fragment {
         } else {
             alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
+        }
+    }
+
+//método separado chamado uma única vez via flag SharedPreferences
+    private void migrarLembretesAntigos(List<LembreteInstancia> instancias) {
+        SharedPreferences prefs = requireContext()
+                .getSharedPreferences("lembretes_reboot", Context.MODE_PRIVATE);
+
+        // Evita rodar mais de uma vez
+        if (prefs.getBoolean("migrado_v2", false)) return;
+
+        SharedPreferences.Editor editor = prefs.edit();
+
+        for (Map.Entry<String, ?> entry : prefs.getAll().entrySet()) {
+            String valor = (String) entry.getValue();
+            if (valor == null) continue;
+            String[] partes = valor.split("\\|");
+            if (partes.length != 6) continue; // só entradas antigas
+
+            String titulo = partes[0];
+            int hora      = Integer.parseInt(partes[2]);
+            int minuto    = Integer.parseInt(partes[3]);
+
+            // Busca o templateId correspondente nas instâncias carregadas
+            Long templateId = null;
+            for (LembreteInstancia inst : instancias) {
+                if (inst.titulo.equals(titulo)
+                        && inst.horario != null
+                        && inst.horario.startsWith(String.format("%02d:%02d", hora, minuto))) {
+                    templateId = inst.templateId;
+                    break;
+                }
+            }
+
+            if (templateId == null) {
+                // Não achou correspondência — remove entrada órfã
+                editor.remove(entry.getKey());
+                Log.d("Migração", "Entrada órfã removida: " + titulo);
+                continue;
+            }
+
+            // Reconstrói com 7 campos e chave correta
+            String novoValor = partes[0] + "|" + partes[1] + "|" + partes[2] + "|"
+                    + partes[3] + "|" + partes[4] + "|" + partes[5] + "|" + templateId;
+            String novaChave = "lembrete_" + (int) (long) templateId;
+
+            editor.remove(entry.getKey()); // remove chave antiga (hash)
+            editor.putString(novaChave, novoValor); // adiciona com chave nova
+            Log.d("Migração", "Migrado: " + titulo + " → templateId=" + templateId);
+        }
+
+        editor.putBoolean("migrado_v2", true);
+        editor.apply();
+
+        // Reagenda tudo com os dados corrigidos
+        if (getContext() != null) {
+            new br.fmu.projetoasthmaspace.Data.worker.BootReceiver()
+                    .onReceive(requireContext(),
+                            new Intent(Intent.ACTION_BOOT_COMPLETED));
         }
     }
 

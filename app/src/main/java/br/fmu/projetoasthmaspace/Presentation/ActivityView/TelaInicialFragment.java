@@ -247,12 +247,12 @@ public class TelaInicialFragment extends Fragment {
         binding.textRecomendacao.setText(AirQualityUtils.gerarRecomendacaoAqi(aqi));
 
         poluentes.clear();
-        poluentes.add(new Poluente("PM2.5", "Partículas Finas",      fmt(pm25) + " pg/m³", AirQualityUtils.statusPm25(pm25)));
-        poluentes.add(new Poluente("PM10",  "Partículas Inaláveis",  fmt(pm10) + " pg/m³", AirQualityUtils.statusPm10(pm10)));
-        poluentes.add(new Poluente("O₃",    "Ozônio",                fmt(o3)   + " pg/m³", AirQualityUtils.statusO3(o3)));
-        poluentes.add(new Poluente("NO₂",   "Dióxido de Nitrogênio", fmt(no2)  + " pg/m³", AirQualityUtils.statusNo2(no2)));
-        poluentes.add(new Poluente("SO₂",   "Dióxido de Enxofre",    fmt(so2)  + " pg/m³", AirQualityUtils.statusSo2(so2)));
-        poluentes.add(new Poluente("CO",    "Monóxido de Carbono",   fmt(co)   + " pg/m³", AirQualityUtils.statusCo(co)));
+        poluentes.add(new Poluente("PM2.5", "Partículas Finas",      fmt(pm25) + " µg/m³", AirQualityUtils.statusPm25(pm25)));
+        poluentes.add(new Poluente("PM10",  "Partículas Inaláveis",  fmt(pm10) + " µg/m³", AirQualityUtils.statusPm10(pm10)));
+        poluentes.add(new Poluente("O₃",    "Ozônio",                fmt(o3)   + " µg/m³", AirQualityUtils.statusO3(o3)));
+        poluentes.add(new Poluente("NO₂",   "Dióxido de Nitrogênio", fmt(no2)  + " µg/m³", AirQualityUtils.statusNo2(no2)));
+        poluentes.add(new Poluente("SO₂",   "Dióxido de Enxofre",    fmt(so2)  + " µg/m³", AirQualityUtils.statusSo2(so2)));
+        poluentes.add(new Poluente("CO",    "Monóxido de Carbono",   fmt(co)   + " µg/m³", AirQualityUtils.statusCo(co)));
 
         adapter.notifyDataSetChanged();
 

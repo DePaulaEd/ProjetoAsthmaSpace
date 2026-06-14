@@ -19,6 +19,8 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import br.fmu.projetoasthmaspace.Data.Local.NotificacaoDatabase;
+import br.fmu.projetoasthmaspace.Data.Local.NotificacaoEntity;
 import br.fmu.projetoasthmaspace.R;
 
 public class LembreteReceiver extends BroadcastReceiver {
@@ -36,13 +38,23 @@ public class LembreteReceiver extends BroadcastReceiver {
         int    hora        = intent.getIntExtra("hora", -1);
         int    minuto      = intent.getIntExtra("minuto", -1);
         String recorrencia = intent.getStringExtra("recorrencia");
+        long   templateId  = intent.getLongExtra("templateId", -1L); // ✅
         int    requestCode = intent.getIntExtra("requestCode",
                 Math.abs((titulo + "_" + hora + "_" + minuto).hashCode()));
 
         if (titulo == null || mensagem == null || hora < 0 || minuto < 0) return;
 
         dispararNotificacao(context, titulo, mensagem, requestCode);
-        reagendarSeRecorrente(context, titulo, mensagem, hora, minuto, recorrencia, requestCode);
+
+        String dataHora = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                .format(Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo")).getTime());
+        NotificacaoEntity notif = new NotificacaoEntity(titulo, mensagem, dataHora, "LEMBRETE");
+        new Thread(() ->
+                NotificacaoDatabase.getInstance(context).dao().inserir(notif)
+        ).start();
+
+        reagendarSeRecorrente(context, titulo, mensagem, hora, minuto,
+                recorrencia, requestCode, templateId); // ✅ passa templateId
     }
 
     private void dispararNotificacao(Context context, String titulo, String mensagem, int notifId) {
@@ -54,7 +66,7 @@ public class LembreteReceiver extends BroadcastReceiver {
                     CANAL_ID, "Lembretes de Medicação", NotificationManager.IMPORTANCE_HIGH));
         }
 
-        // ✅ Abre MainActivity e sinaliza para navegar até NotificacoesActivity
+
         Intent intent = new Intent(context, br.fmu.projetoasthmaspace.Presentation.ActivityView.MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra("ABRIR_NOTIFICACOES", true);
@@ -77,10 +89,15 @@ public class LembreteReceiver extends BroadcastReceiver {
     }
 
     private void reagendarSeRecorrente(Context context, String titulo, String mensagem,
-                                       int hora, int minuto, String recorrencia, int requestCode) {
+                                       int hora, int minuto, String recorrencia,
+                                       int requestCode, long templateId) {
         if (recorrencia == null || "NENHUMA".equals(recorrencia)) return;
 
         Calendar proximo = Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo"));
+        proximo.set(Calendar.HOUR_OF_DAY, hora);
+        proximo.set(Calendar.MINUTE, minuto);
+        proximo.set(Calendar.SECOND, 0);
+        proximo.set(Calendar.MILLISECOND, 0);
 
         if ("DIARIA".equals(recorrencia)) {
             proximo.add(Calendar.DAY_OF_MONTH, 1);
@@ -90,11 +107,6 @@ public class LembreteReceiver extends BroadcastReceiver {
             return;
         }
 
-        proximo.set(Calendar.HOUR_OF_DAY, hora);
-        proximo.set(Calendar.MINUTE, minuto);
-        proximo.set(Calendar.SECOND, 0);
-        proximo.set(Calendar.MILLISECOND, 0);
-
         Intent novoIntent = new Intent(context, LembreteReceiver.class);
         novoIntent.putExtra("titulo", titulo);
         novoIntent.putExtra("mensagem", mensagem);
@@ -102,6 +114,7 @@ public class LembreteReceiver extends BroadcastReceiver {
         novoIntent.putExtra("minuto", minuto);
         novoIntent.putExtra("recorrencia", recorrencia);
         novoIntent.putExtra("requestCode", requestCode);
+        novoIntent.putExtra("templateId", templateId); // ✅
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 context, requestCode, novoIntent,
@@ -117,16 +130,19 @@ public class LembreteReceiver extends BroadcastReceiver {
             alarmManager.set(AlarmManager.RTC_WAKEUP, proximo.getTimeInMillis(), pendingIntent);
         }
 
-        // Atualiza a data no SharedPreferences para o próximo reboot saber a data correta
+        // ✅ Atualiza SharedPreferences com a nova data e templateId
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         sdf.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
         String novaData = sdf.format(proximo.getTime());
 
         SharedPreferences prefs = context.getSharedPreferences("lembretes_reboot", Context.MODE_PRIVATE);
         String key   = "lembrete_" + requestCode;
-        String valor = titulo + "|" + mensagem + "|" + hora + "|" + minuto + "|" + recorrencia + "|" + novaData;
+        // formato: titulo|mensagem|hora|minuto|recorrencia|data|templateId
+        String valor = titulo + "|" + mensagem + "|" + hora + "|" + minuto
+                + "|" + recorrencia + "|" + novaData + "|" + templateId;
         prefs.edit().putString(key, valor).apply();
 
-        Log.d(TAG, "Reagendado (" + recorrencia + ") para: " + novaData + " " + hora + ":" + minuto);
+        Log.d(TAG, "Reagendado (" + recorrencia + ") para: " + novaData
+                + " " + hora + ":" + minuto + " requestCode=" + requestCode);
     }
 }

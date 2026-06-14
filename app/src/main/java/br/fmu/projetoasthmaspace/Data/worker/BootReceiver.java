@@ -54,8 +54,8 @@ public class BootReceiver extends BroadcastReceiver {
         for (Map.Entry<String, ?> entry : todos.entrySet()) {
             try {
                 String[] partes = ((String) entry.getValue()).split("\\|");
-                if (partes.length < 6) {
-                    Log.w(TAG, "Entrada inválida, ignorando: " + entry.getKey());
+                if (partes.length < 7) { // ✅ agora exige 7 campos
+                    Log.w(TAG, "Entrada inválida (formato antigo?), ignorando: " + entry.getKey());
                     continue;
                 }
 
@@ -65,8 +65,9 @@ public class BootReceiver extends BroadcastReceiver {
                 int    minuto      = Integer.parseInt(partes[3]);
                 String recorrencia = partes[4];
                 String dataStr     = partes[5];
+                long   templateId  = Long.parseLong(partes[6]); // ✅
+                int    requestCode = (int) templateId;           // ✅ consistente
 
-                // Monta o Calendar com data + hora exatos
                 Calendar c = Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo"));
                 Date dataParsed = sdf.parse(dataStr);
                 if (dataParsed != null) c.setTime(dataParsed);
@@ -75,26 +76,23 @@ public class BootReceiver extends BroadcastReceiver {
                 c.set(Calendar.SECOND, 0);
                 c.set(Calendar.MILLISECOND, 0);
 
-                // Se o horário já passou e não é recorrente, remove e pula
                 if (c.before(Calendar.getInstance())) {
                     if ("NENHUMA".equals(recorrencia)) {
                         prefs.edit().remove(entry.getKey()).apply();
                         Log.d(TAG, "Lembrete expirado removido: " + titulo);
                         continue;
                     }
-                    // Recorrente: avança até a próxima ocorrência futura
                     int diasParaAvancar = "SEMANAL".equals(recorrencia) ? 7 : 1;
                     while (c.before(Calendar.getInstance())) {
                         c.add(Calendar.DAY_OF_MONTH, diasParaAvancar);
                     }
-                    // Atualiza a data no SharedPreferences
-                    String novaData = sdf.format(c.getTime());
+                    // ✅ Atualiza data no SharedPreferences
+                    String novaData  = sdf.format(c.getTime());
+                    // formato: titulo|mensagem|hora|minuto|recorrencia|data|templateId
                     String novoValor = titulo + "|" + mensagem + "|" + hora + "|" + minuto
-                            + "|" + recorrencia + "|" + novaData;
+                            + "|" + recorrencia + "|" + novaData + "|" + templateId;
                     prefs.edit().putString(entry.getKey(), novoValor).apply();
                 }
-
-                int requestCode = Math.abs((titulo + "_" + hora + "_" + minuto).hashCode());
 
                 Intent lembreteIntent = new Intent(context, LembreteReceiver.class);
                 lembreteIntent.putExtra("titulo", titulo);
@@ -103,6 +101,7 @@ public class BootReceiver extends BroadcastReceiver {
                 lembreteIntent.putExtra("minuto", minuto);
                 lembreteIntent.putExtra("recorrencia", recorrencia);
                 lembreteIntent.putExtra("requestCode", requestCode);
+                lembreteIntent.putExtra("templateId", templateId); // ✅
 
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(
                         context, requestCode, lembreteIntent,
@@ -116,7 +115,8 @@ public class BootReceiver extends BroadcastReceiver {
                     alarmManager.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
                 }
 
-                Log.d(TAG, "Reagendado: " + titulo + " para " + c.getTime());
+                Log.d(TAG, "Reagendado: " + titulo + " para " + c.getTime()
+                        + " requestCode=" + requestCode);
 
             } catch (ParseException | NumberFormatException e) {
                 Log.e(TAG, "Erro ao reagendar lembrete: " + entry.getKey(), e);

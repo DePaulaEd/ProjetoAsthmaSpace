@@ -22,6 +22,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Tasks;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -60,6 +61,16 @@ public class QualidadeArWorker extends Worker {
     @Override
     public Result doWork() {
         try {
+            // --- Guarda de horário: só executa entre 07h e 22h ---
+            Calendar agora = Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo"));
+            int hora = agora.get(Calendar.HOUR_OF_DAY);
+            if (hora < 7 || hora >= 22) {
+                Log.d(TAG, "Fora da janela permitida (" + hora + "h). Worker encerrado sem notificar.");
+                NotificacaoScheduler.agendarProximoAlarme(getApplicationContext());
+                return Result.success();
+            }
+            // --- Fim da guarda ---
+
             double[] coords = obterCoordenadas();
             double lat = coords[0];
             double lon = coords[1];
@@ -74,10 +85,11 @@ public class QualidadeArWorker extends Worker {
                     || response.body().list == null
                     || response.body().list.isEmpty()) {
                 Log.e(TAG, "Resposta inválida: " + response.code());
-                return Result.retry();
+                return Result.success();
             }
 
             int aqiAtual = response.body().list.get(0).main.aqi;
+
 
             // --- Formatadores de data ---
             SimpleDateFormat sdfDataHora = new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("pt", "BR"));
@@ -153,11 +165,16 @@ public class QualidadeArWorker extends Worker {
                     .putString(KEY_DATA_ANT, dataHoje)
                     .apply();
 
+            // --- Agenda o próximo alarme após execução bem-sucedida ---
+            NotificacaoScheduler.agendarProximoAlarme(getApplicationContext());
+
             return Result.success();
 
         } catch (Exception e) {
             Log.e(TAG, "Erro no worker: " + e.getMessage());
-            return Result.retry();
+            // Agenda mesmo em erro para não perder a sequência
+            NotificacaoScheduler.agendarProximoAlarme(getApplicationContext());
+            return Result.success();
         }
     }
 
