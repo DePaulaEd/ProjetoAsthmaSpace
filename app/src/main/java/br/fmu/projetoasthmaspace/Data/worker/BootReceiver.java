@@ -52,9 +52,12 @@ public class BootReceiver extends BroadcastReceiver {
         if (alarmManager == null) return;
 
         for (Map.Entry<String, ?> entry : todos.entrySet()) {
+            // Ignora entradas que não sejam String
+            if (!(entry.getValue() instanceof String)) continue;
+
             try {
                 String[] partes = ((String) entry.getValue()).split("\\|");
-                if (partes.length < 7) { // ✅ agora exige 7 campos
+                if (partes.length < 7) {
                     Log.w(TAG, "Entrada inválida (formato antigo?), ignorando: " + entry.getKey());
                     continue;
                 }
@@ -65,8 +68,8 @@ public class BootReceiver extends BroadcastReceiver {
                 int    minuto      = Integer.parseInt(partes[3]);
                 String recorrencia = partes[4];
                 String dataStr     = partes[5];
-                long   templateId  = Long.parseLong(partes[6]); // ✅
-                int    requestCode = (int) templateId;           // ✅ consistente
+                long   templateId  = Long.parseLong(partes[6]);
+                int    requestCode = (int) templateId;
 
                 Calendar c = Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo"));
                 Date dataParsed = sdf.parse(dataStr);
