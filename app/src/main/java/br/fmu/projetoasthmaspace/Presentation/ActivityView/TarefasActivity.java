@@ -34,6 +34,8 @@ public class TarefasActivity extends Fragment {
     private boolean dadosCarregados = false;
     private boolean carregando = false; // ← flag anti-duplicata
 
+    private int requestGeneration = 0;
+
     private TarefasAdapter adapter;
     private final List<LembreteInstancia> tarefasPendentes  = new ArrayList<>();
     private final List<LembreteInstancia> tarefasConcluidas = new ArrayList<>();
@@ -55,11 +57,13 @@ public class TarefasActivity extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         api = ApiClient.getApiService(requireContext());
         binding.recyclerTarefas.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.recyclerTarefas.setItemAnimator(null);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if (isHidden()) return;
         dadosCarregados = false;
         carregarInstanciasDeHoje();
     }
@@ -99,16 +103,19 @@ public class TarefasActivity extends Fragment {
     // ── Backend ───────────────────────────────────────────────────────────────
 
     private void carregarInstanciasDeHoje() {
-        if (carregando) return; // ← bloqueia chamada duplicata
+        if (carregando) return;
         carregando = true;
         if (!dadosCarregados) mostrarSkeleton();
+
+        final int gen = ++requestGeneration; // ← geração desta requisição
 
         api.instanciasDeHoje().enqueue(new Callback<List<LembreteInstancia>>() {
             @Override
             public void onResponse(Call<List<LembreteInstancia>> call,
                                    Response<List<LembreteInstancia>> response) {
-                carregando = false; // ← libera sempre
+                carregando = false;
                 if (!isAdded() || binding == null) return;
+                if (gen != requestGeneration) return; // ← resposta obsoleta, descarta
 
                 if (response.isSuccessful() && response.body() != null) {
                     dadosCarregados = true;
@@ -134,6 +141,7 @@ public class TarefasActivity extends Fragment {
             @Override
             public void onFailure(Call<List<LembreteInstancia>> call, Throwable t) {
                 carregando = false; // ← libera sempre
+                if (gen != requestGeneration) return;
                 if (!isAdded() || binding == null) return;
                 Log.e("TAREFAS", "Falha: " + t.getMessage());
                 esconderSkeleton();
@@ -142,10 +150,20 @@ public class TarefasActivity extends Fragment {
     }
 
     private void concluirInstancia(LembreteInstancia tarefa) {
-        tarefasPendentes.remove(tarefa);
+        requestGeneration++;
+        Log.d("TAREFAS", "concluir clicado em " + System.currentTimeMillis());
+        int pos = tarefasPendentes.indexOf(tarefa);
+        if (pos < 0) return; // já processada (proteção contra clique duplo)
+
+        tarefasPendentes.remove(pos);
         tarefasConcluidas.add(tarefa);
         tarefa.status = "CONCLUIDO";
-        atualizarUI();
+
+        if (adapter != null) {
+            adapter.notifyItemRemoved(pos); // ← linha sai animada, sem re-bindar as outras
+        }
+        atualizarContador();
+        atualizarConcluidasHoje();
 
         api.atualizarStatus(tarefa.instanciaId, "CONCLUIDO").enqueue(new Callback<Void>() {
             @Override
@@ -156,7 +174,7 @@ public class TarefasActivity extends Fragment {
                         tarefasConcluidas.remove(tarefa);
                         tarefasPendentes.add(tarefa);
                         tarefa.status = "PENDENTE";
-                        atualizarUI();
+                        atualizarUI(); // rollback raro → refresh completo é aceitável
                     }
                 }
             }
@@ -172,8 +190,16 @@ public class TarefasActivity extends Fragment {
             }
         });
     }
+    private void atualizarContador() {
+        if (!isAdded() || binding == null) return;
+        int n = tarefasPendentes.size();
+        binding.contadorTarefas.setText(
+                n == 1 ? "1 tarefa pendente"
+                        : String.format(Locale.getDefault(), "%d tarefas pendentes", n));
+    }
 
     private void reabrirInstancia(LembreteInstancia tarefa) {
+        requestGeneration++;
         tarefasConcluidas.remove(tarefa);
         tarefasPendentes.add(tarefa);
         tarefa.status = "PENDENTE";
@@ -210,10 +236,7 @@ public class TarefasActivity extends Fragment {
     private void atualizarUI() {
         if (!isAdded() || binding == null) return;
 
-        int n = tarefasPendentes.size();
-        binding.contadorTarefas.setText(
-                n == 1 ? "1 tarefa pendente"
-                        : String.format(Locale.getDefault(), "%d tarefas pendentes", n));
+        atualizarContador();
 
         if (adapter == null) {
             adapter = new TarefasAdapter(tarefasPendentes, this::concluirInstancia);

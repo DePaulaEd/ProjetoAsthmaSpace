@@ -19,15 +19,17 @@ public class NotificacaoScheduler {
 
     /**
      * Chamado uma vez no Application.onCreate para garantir que
-     * sempre existe um alarme agendado.
+     * sempre existe um alarme agendado ao iniciar o processo do app.
      */
     public static void agendarVerificacaoAr(Context context) {
         agendarProximoAlarme(context);
     }
 
     /**
-     * Agenda o próximo alarme da sequência.
-     * Chamado também pelo QualidadeArReceiver após cada disparo.
+     * Agenda o próximo alarme da sequência (janelas fixas de 7h às 22h).
+     * Chamado pelo QualidadeArWorker ao final de doWork() — nunca pelo
+     * QualidadeArReceiver — para que o próximo disparo seja calculado
+     * apenas após a conclusão da verificação atual.
      */
     public static void agendarProximoAlarme(Context context) {
         long proximoDisparo = calcularProximoDisparo();
@@ -81,34 +83,32 @@ public class NotificacaoScheduler {
     }
 
     private static long calcularProximoDisparo() {
-        // IMPORTANTE: usa fuso de São Paulo para não errar horário
-        Calendar agora = Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo"));
-        int horaAtual  = agora.get(Calendar.HOUR_OF_DAY);
-        int minAtual   = agora.get(Calendar.MINUTE);
+        long agora = System.currentTimeMillis();
+        // Folga de 2 min: garante que nunca agendamos para "agora" ou para o passado,
+        // mesmo que este método rode segundos após o disparo do alarme atual
+        long margemSeguranca = 2 * 60 * 1000L;
 
-        int proximaJanela = -1;
+        TimeZone tzSp = TimeZone.getTimeZone("America/Sao_Paulo");
 
         for (int janela : JANELAS) {
-            // Só considera janela que ainda não passou (com 1 min de margem)
-            if (horaAtual < janela || (horaAtual == janela && minAtual < 1)) {
-                proximaJanela = janela;
-                break;
+            Calendar candidato = Calendar.getInstance(tzSp);
+            candidato.set(Calendar.HOUR_OF_DAY, janela);
+            candidato.set(Calendar.MINUTE, 0);
+            candidato.set(Calendar.SECOND, 0);
+            candidato.set(Calendar.MILLISECOND, 0);
+
+            if (candidato.getTimeInMillis() > agora + margemSeguranca) {
+                return candidato.getTimeInMillis();
             }
         }
 
-        Calendar proxima = Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo"));
-        proxima.set(Calendar.MINUTE, 0);
-        proxima.set(Calendar.SECOND, 0);
-        proxima.set(Calendar.MILLISECOND, 0);
-
-        if (proximaJanela == -1) {
-            // Passou de 22h — agenda para amanhã às 7h
-            proxima.add(Calendar.DAY_OF_MONTH, 1);
-            proxima.set(Calendar.HOUR_OF_DAY, 7);
-        } else {
-            proxima.set(Calendar.HOUR_OF_DAY, proximaJanela);
-        }
-
-        return proxima.getTimeInMillis();
+        // Todas as janelas de hoje já passaram — amanhã às 7h
+        Calendar amanha = Calendar.getInstance(tzSp);
+        amanha.add(Calendar.DAY_OF_MONTH, 1);
+        amanha.set(Calendar.HOUR_OF_DAY, 7);
+        amanha.set(Calendar.MINUTE, 0);
+        amanha.set(Calendar.SECOND, 0);
+        amanha.set(Calendar.MILLISECOND, 0);
+        return amanha.getTimeInMillis();
     }
 }

@@ -43,10 +43,14 @@ public class TarefasAdapter extends RecyclerView.Adapter<TarefasAdapter.TarefaVi
         holder.checkbox.setEnabled(false);
         holder.checkbox.setText(tarefa.titulo + " - " + tarefa.getHorarioFormatado());
         holder.checkbox.setChecked(false);
+        holder.checkbox.jumpDrawablesToCurrentState();
         holder.checkbox.setEnabled(true);
 
         holder.checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) listener.onTarefaConcluida(tarefa);
+            if (isChecked) {
+                buttonView.setEnabled(false); // evita duplo clique durante o delay
+                buttonView.postDelayed(() -> listener.onTarefaConcluida(tarefa), 400);
+            }
         });
     }
 

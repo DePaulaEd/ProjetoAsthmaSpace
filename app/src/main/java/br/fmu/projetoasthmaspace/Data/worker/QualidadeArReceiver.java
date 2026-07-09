@@ -13,6 +13,9 @@ public class QualidadeArReceiver extends BroadcastReceiver {
 
     private static final String TAG = "QualidadeArReceiver";
 
+    // Não chamar agendarProximoAlarme aqui — o reagendamento é
+    // responsabilidade do QualidadeArWorker ao final do doWork()
+
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "Alarme recebido — iniciando Worker");

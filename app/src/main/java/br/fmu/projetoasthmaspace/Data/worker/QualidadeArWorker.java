@@ -62,6 +62,7 @@ public class QualidadeArWorker extends Worker {
     public Result doWork() {
         try {
             // --- Guarda de horário: só executa entre 07h e 22h ---
+            Log.d(TAG, "doWork iniciado. id=" + getId() + " tentativa=" + getRunAttemptCount());
             Calendar agora = Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo"));
             int hora = agora.get(Calendar.HOUR_OF_DAY);
             if (hora < 7 || hora >= 22) {

@@ -67,6 +67,8 @@ public class LembretesActivity extends Fragment {
     private SimpleDateFormat displayDateFormat;
     private String filtroAtivo = null;
     private boolean dadosCarregados = false;
+
+    private final java.util.Set<String> gruposExpandidos = new java.util.HashSet<>();
     private boolean carregando = false; // ← flag anti-duplicata
     private final List<LembreteInstancia> listaDeInstancias = new ArrayList<>();
     private int diasPassadosFiltro = 7;
@@ -639,10 +641,19 @@ public class LembretesActivity extends Fragment {
                 containerDia.addView(itemView);
             }
 
-            dataHeader.setOnClickListener(v ->
-                    containerDia.setVisibility(
-                            containerDia.getVisibility() == View.GONE
-                                    ? View.VISIBLE : View.GONE));
+            // Restaura o estado de expansão que o usuário deixou antes do re-render
+            containerDia.setVisibility(
+                    gruposExpandidos.contains(dataKey) ? View.VISIBLE : View.GONE);
+
+            dataHeader.setOnClickListener(v -> {
+                if (containerDia.getVisibility() == View.GONE) {
+                    containerDia.setVisibility(View.VISIBLE);
+                    gruposExpandidos.add(dataKey);
+                } else {
+                    containerDia.setVisibility(View.GONE);
+                    gruposExpandidos.remove(dataKey);
+                }
+            });
 
             binding.containerLembretes.addView(groupView);
         }
